@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] — 2026-05-08
+
+### Added
+- Docker app container can reach a host-running Ollama out of the box.
+  `docker-compose.yml` sets `OLLAMA_API_BASE` to `host.docker.internal:11434`
+  and adds an `extra_hosts` entry mapping `host.docker.internal` to the
+  host gateway so Linux Docker behaves the same as Mac/Windows. Override
+  via `OLLAMA_API_BASE` in `.env` for non-default Ollama setups.
+
+### Fixed
+- `complete_json()` no longer surfaces a confusing `JSONDecodeError` when
+  the underlying LLM call fails or returns prose. It now:
+  - Raises a clear "missing API key for $provider" hint when the response
+    is empty.
+  - Strips Markdown fences and leading/trailing prose before parsing
+    (common with local models).
+  - Surfaces the first 200 characters of the response on parse failure so
+    `BadRequestError` etc. are no longer swallowed.
+
 ## [0.1.5] — 2026-05-08
 
 ### Fixed
@@ -148,7 +167,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...v0.1.3

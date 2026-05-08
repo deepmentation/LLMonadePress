@@ -15,6 +15,15 @@ services:
       # not `localhost`. The .env value uses localhost so non-Docker dev
       # setups (running `lemonade` directly) work out of the box.
       DATABASE_URL: postgresql+asyncpg://lemonade:${DB_PASS:-changeme}@db:5432/lemonade
+      # Reach the host's Ollama from inside the container (Mac & Windows
+      # resolve host.docker.internal automatically; on Linux see extra_hosts
+      # below). Override in .env if your Ollama runs on a different host/port.
+      OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+    extra_hosts:
+      # Linux Docker doesn't auto-define host.docker.internal; this maps it
+      # to the host gateway so the same OLLAMA_API_BASE value works on Linux
+      # too. No effect on Mac/Windows where Docker Desktop already provides it.
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./config.toml:/app/config.toml:ro
       - ./output:/app/output

@@ -71,8 +71,35 @@ class LLMClient:
             max_tokens=max_tokens,
             response_format={"type": "json_object"},
         )
-        parsed = json.loads(response.content)
-        return parsed, response
+        content = (response.content or "").strip()
+        if not content:
+            raise RuntimeError(
+                f"LLM ({response.model}) returned empty content. "
+                "Common cause: missing or invalid API key for that provider. "
+                "Set the right *_API_KEY in .env, or switch ranker_model / "
+                "writer_model in config.toml to a provider you have a key for "
+                "(e.g. ollama/qwen3:14b for fully local, or "
+                "openrouter/anthropic/claude-sonnet-4 if you only have an "
+                "OpenRouter key)."
+            )
+        # Local models often wrap JSON in prose or ```json fences. Try to find
+        # the JSON object inside the response before failing.
+        try:
+            return json.loads(content), response
+        except json.JSONDecodeError:
+            start = content.find("{")
+            end = content.rfind("}")
+            if start != -1 and end > start:
+                try:
+                    return json.loads(content[start : end + 1]), response
+                except json.JSONDecodeError:
+                    pass
+            raise RuntimeError(
+                f"LLM ({response.model}) did not return valid JSON. "
+                f"First 200 chars: {content[:200]!r}. "
+                "If this is a local model, try a more capable one "
+                "(qwen3:14b or larger) or set a stricter system prompt."
+            ) from None
 
 
 async def get_embeddings(texts: list[str], model: str = "openai/text-embedding-3-small") -> list[list[float]]:
