@@ -1,0 +1,111 @@
+# ============================================================================
+# Lemonade — Beispiel-Konfiguration
+# Kopiere diese Datei nach config.toml und passe sie an.
+# ============================================================================
+
+[user]
+# Zeitzone fuer die Zustellzeit (IANA-Format)
+timezone       = "Europe/Berlin"
+# Wann die Zeitung fertig sein soll (lokale Zeit)
+delivery_time  = "06:30"
+# Ausgabesprache der generierten Zeitung
+language       = "de"
+# Maximale Anzahl Stories pro Ausgabe
+max_stories    = 12
+
+# ─── LLM-Konfiguration ─────────────────────────────────────────────────────
+[llm]
+# LiteLLM-Provider-Strings — austauschbar zwischen Cloud und Lokal:
+#   "anthropic/claude-sonnet-4-6"      (Anthropic Cloud)
+#   "openai/gpt-5"                     (OpenAI Cloud)
+#   "ollama/qwen3:32b"                 (Lokal via Ollama)
+#   "groq/llama-3.3-70b-versatile"     (Groq Cloud)
+
+# Modell fuer Clustering und Ranking (schnell + guenstig)
+ranker_model    = "anthropic/claude-haiku-4-5"
+# Modell fuer das Schreiben der Artikel (Qualitaet wichtig)
+writer_model    = "anthropic/claude-sonnet-4-6"
+# Embedding-Modell fuer semantische Aehnlichkeit
+embedding_model = "openai/text-embedding-3-small"
+# API-Keys aus Umgebungsvariablen lesen (nicht hier im TOML speichern!)
+api_keys_env    = true
+
+# ─── Spracherkennung (ASR) fuer YouTube ohne Untertitel ────────────────────
+[asr]
+# Backend: "faster-whisper" (lokal, GPU optional) oder "groq" (Cloud, schnell)
+backend        = "faster-whisper"
+# Modellgroesse: "tiny", "base", "small", "medium", "large-v3"
+model_size     = "medium"
+# Sprache: "auto" fuer automatische Erkennung, oder ISO-Code z.B. "de", "en"
+language       = "auto"
+
+# ─── Zustellung ────────────────────────────────────────────────────────────
+[delivery]
+# Fuer welche Geraete PDFs gerendert werden sollen
+# Verfuegbare Profile: remarkable_ppm, remarkable_pp, remarkable_2,
+#                      kindle_paperwhite, ipad_mini, generic_a5
+devices        = ["remarkable_ppm", "generic_a5"]
+
+# reMarkable-Zustellung via rmapi
+[delivery.remarkable]
+enabled        = true
+# Geraeteprofil fuer PDF-Rendering
+device_profile = "remarkable_ppm"
+# Zielordner auf dem reMarkable
+folder         = "Newspaper"
+# Alte Ausgaben nach X Tagen archivieren (annotierte werden behalten)
+keep_days      = 30
+
+# Dateisystem-Zustellung (fuer Syncthing, Dropbox, USB, ...)
+[delivery.filesystem]
+enabled        = true
+# Ausgabeverzeichnis fuer die generierten PDFs
+output_dir     = "/app/output"
+
+# E-Mail-Zustellung (auch fuer Send-to-Kindle geeignet)
+[delivery.email]
+enabled        = false
+# Geraeteprofil fuer das per Mail versendete PDF
+device_profile = "kindle_paperwhite"
+# Empfaenger-Adressen (mehrere moeglich)
+to             = ["meine-mail@example.com"]
+# Absendername in der E-Mail
+from_name      = "Lemonade Daily"
+# Betreff-Template ({date} wird ersetzt)
+subject_template = "Lemonade — {date:%A, %d. %B %Y}"
+# SMTP-Einstellungen kommen aus Umgebungsvariablen:
+#   LEMONADE_SMTP_HOST, LEMONADE_SMTP_PORT,
+#   LEMONADE_SMTP_USER, LEMONADE_SMTP_PASS, LEMONADE_SMTP_FROM
+# PDF als Anhang mitsenden
+attach_pdf     = true
+# Zusammenfassung der Headlines im Mail-Body
+include_summary_in_body = true
+
+# ─── RSS-Quellen ───────────────────────────────────────────────────────────
+# Jede [[rss]]-Sektion definiert einen Feed.
+
+[[rss]]
+url            = "https://www.lesswrong.com/feed.xml"
+# Kategorie fuer die Gruppierung in der Zeitung
+category       = "Longform"
+
+[[rss]]
+url            = "https://feeds.arstechnica.com/arstechnica/index"
+category       = "Tech"
+# Volltext nachladen wenn der Feed nur Teaser liefert
+follow_links   = true
+
+# ─── YouTube-Quellen ───────────────────────────────────────────────────────
+# Jede [[youtube]]-Sektion definiert einen Kanal.
+
+[[youtube]]
+# Channel-ID (aus der YouTube-URL)
+channel_id     = "UCBa659QWEk1AI4tG9mmH4-A"   # Two Minute Papers
+category       = "AI"
+# Videos kuerzer als X Sekunden ignorieren (filtert Shorts)
+min_duration_s = 180
+
+[[youtube]]
+# Alternativ: Channel-Handle statt ID
+channel_handle = "@simonwillison"
+category       = "AI"

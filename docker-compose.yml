@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./output:/app/output
+      - rmapi-config:/root/.config/rmapi
+
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: lemonade
+      POSTGRES_PASSWORD: ${DB_PASS:-changeme}
+      POSTGRES_DB: lemonade
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lemonade"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+  rmapi-config:
