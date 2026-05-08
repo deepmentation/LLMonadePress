@@ -38,26 +38,50 @@ Device profiles are YAML files — community contributions for new devices are w
 
 ## Quick Start
 
+**1. Clone the repository**
+
 ```bash
-# 1. Clone the repository
 git clone https://github.com/lemonade-newspaper/lemonade.git
 cd lemonade
+```
 
-# 2. Set up environment and config (BOTH files must exist before `docker compose up`,
-#    otherwise Docker's bind mount auto-creates them as empty directories).
-cp .env.example .env                          # add your API keys here
-cp examples/config.example.toml config.toml   # edit your sources & preferences
+**2. Set up environment and config**
 
-# 3. Start the database (the app container is a batch job, not a daemon)
+Both files must exist on disk *before* you start Docker — otherwise Docker's
+bind mount silently creates them as empty directories.
+
+```bash
+cp .env.example .env
+cp examples/config.example.toml config.toml
+```
+
+Edit `.env` to add your LLM API keys, and `config.toml` to add your RSS feeds
+and YouTube channels.
+
+**3. Start the database**
+
+The app container is a batch job, not a daemon, so only the database runs in
+the background.
+
+```bash
 docker compose up -d db
+```
 
-# 4. Initialize the schema
+**4. Initialize the schema**
+
+```bash
 docker compose run --rm app init
+```
 
-# 5. Preview a test edition (no delivery)
+**5. Preview a test edition (no delivery)**
+
+```bash
 docker compose run --rm app preview
+```
 
-# 6. Run a full edition with delivery
+**6. Run a full edition with delivery**
+
+```bash
 docker compose run --rm app run
 ```
 
