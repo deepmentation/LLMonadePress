@@ -77,42 +77,70 @@ async def _embed_items(
     await session.flush()
 
 
+async def _ingest_one(
+    session: AsyncSession,
+    source_type: str,
+    identifier: str,
+    config_dict: dict,
+    fetch_coro,
+    label: str,
+) -> list[Item]:
+    """Ingest a single source inside a savepoint so its failure doesn't poison
+    the surrounding transaction. Commits the savepoint on success, rolls it
+    back on failure."""
+    try:
+        async with session.begin_nested():
+            source = await _ensure_source(session, source_type, identifier, config_dict)
+            fetched = await fetch_coro(source)
+            new_items = await _store_items(session, source, fetched)
+            source.last_fetched = datetime.now(UTC)
+            logger.info("%s %s: %d new items", label, identifier, len(new_items))
+            return new_items
+    except Exception:
+        logger.exception("Failed to ingest %s source %s", label, identifier)
+        return []
+
+
 async def ingest(config: LemonadeConfig, session: AsyncSession) -> list[Item]:
-    """Run the full ingestion pipeline: fetch from all sources, store, embed."""
+    """Run the full ingestion pipeline: fetch from all sources, store, embed.
+
+    Each source runs in its own savepoint — a single broken feed cannot
+    abort the rest of the run.
+    """
     since = datetime.now(UTC) - timedelta(hours=48)
     all_new_items: list[Item] = []
 
     rss_adapter = RSSAdapter()
     for src in config.rss:
-        try:
-            source = await _ensure_source(
-                session, "rss", src.url, src.model_dump()
-            )
-            fetched = await rss_adapter.fetch(src.url, src.model_dump(), since)
-            new_items = await _store_items(session, source, fetched)
-            all_new_items.extend(new_items)
-            source.last_fetched = datetime.now(UTC)
-            logger.info("RSS %s: %d new items", src.url, len(new_items))
-        except Exception:
-            logger.exception("Failed to ingest RSS source %s", src.url)
+        items = await _ingest_one(
+            session,
+            "rss",
+            src.url,
+            src.model_dump(),
+            lambda _source, src=src: rss_adapter.fetch(src.url, src.model_dump(), since),
+            "RSS",
+        )
+        all_new_items.extend(items)
 
     yt_adapter = YouTubeAdapter()
     for src in config.youtube:
         identifier = src.channel_id or src.channel_handle or ""
-        try:
-            source = await _ensure_source(
-                session, "youtube_channel", identifier, src.model_dump()
-            )
-            fetched = await yt_adapter.fetch(identifier, src.model_dump(), since)
-            new_items = await _store_items(session, source, fetched)
-            all_new_items.extend(new_items)
-            source.last_fetched = datetime.now(UTC)
-            logger.info("YouTube %s: %d new items", identifier, len(new_items))
-        except Exception:
-            logger.exception("Failed to ingest YouTube source %s", identifier)
+        items = await _ingest_one(
+            session,
+            "youtube_channel",
+            identifier,
+            src.model_dump(),
+            lambda _source, src=src, identifier=identifier: yt_adapter.fetch(
+                identifier, src.model_dump(), since
+            ),
+            "YouTube",
+        )
+        all_new_items.extend(items)
 
-    # Embed all items that need embeddings (new + any previously missing)
-    await _embed_items(session, all_new_items, config.llm.embedding_model)
+    try:
+        await _embed_items(session, all_new_items, config.llm.embedding_model)
+    except Exception:
+        logger.exception("Failed to compute embeddings; continuing with what we have")
+
     await session.commit()
-
     return all_new_items

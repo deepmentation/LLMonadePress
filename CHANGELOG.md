@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] — 2026-05-08
+
+### Fixed
+- All timestamp columns are now `TIMESTAMP WITH TIME ZONE` (`TIMESTAMPTZ`).
+  The model declarations missed the `timezone=True` flag, which caused
+  asyncpg to reject every insert from a feed adapter with
+  `can't subtract offset-naive and offset-aware datetimes`. KONZEPT.md §4
+  always specified `TIMESTAMPTZ`; the implementation has caught up.
+- Each source is now ingested inside its own savepoint
+  (`session.begin_nested()`). A single broken feed used to poison the
+  whole session — every subsequent source then failed with
+  `PendingRollbackError`. Now one bad feed is just one bad feed.
+- Embedding failures (e.g. missing API key for the configured embedding
+  provider) no longer abort the run. The pipeline logs the error,
+  commits whatever items were ingested, and continues — useful for
+  diagnosing config issues without losing fetched content.
+- Default `datetime` factories switched from deprecated `datetime.utcnow`
+  to `datetime.now(UTC)`.
+
+### Docs
+- `config.example.toml` now warns explicitly that OpenRouter does not
+  proxy embeddings, with a list of working alternatives (OpenAI, Voyage,
+  Hugging Face, local Ollama).
+
 ## [0.1.4] — 2026-05-08
 
 ### Fixed
@@ -124,7 +148,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.1...v0.1.2

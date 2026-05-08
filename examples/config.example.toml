@@ -29,7 +29,13 @@ max_stories    = 12
 ranker_model    = "anthropic/claude-haiku-4-5"
 # Modell fuer das Schreiben der Artikel (Qualitaet wichtig)
 writer_model    = "anthropic/claude-sonnet-4-6"
-# Embedding-Modell fuer semantische Aehnlichkeit
+# Embedding-Modell fuer semantische Aehnlichkeit.
+# WICHTIG: OpenRouter unterstuetzt KEINE Embeddings — wenn du nur einen
+# OPENROUTER_API_KEY hast, brauchst du hier einen anderen Provider:
+#   "openai/text-embedding-3-small"     (OpenAI, OPENAI_API_KEY)
+#   "voyage/voyage-3-lite"              (Voyage AI, VOYAGE_API_KEY)
+#   "huggingface/BAAI/bge-large-en-v1.5" (HF, HUGGINGFACE_API_KEY)
+#   "ollama/nomic-embed-text"           (lokal via Ollama, kein Key)
 embedding_model = "openai/text-embedding-3-small"
 # API-Keys aus Umgebungsvariablen lesen (nicht hier im TOML speichern!)
 api_keys_env    = true

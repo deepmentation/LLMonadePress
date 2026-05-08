@@ -31,7 +31,7 @@ def upgrade() -> None:
         sa.Column("display_name", sa.Text(), nullable=True),
         sa.Column("config", postgresql.JSONB(), nullable=False, server_default="{}"),
         sa.Column("enabled", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column("last_fetched", sa.DateTime(), nullable=True),
+        sa.Column("last_fetched", sa.DateTime(timezone=True), nullable=True),
     )
 
     op.create_table(
@@ -42,11 +42,11 @@ def upgrade() -> None:
         sa.Column("url", sa.Text(), nullable=False),
         sa.Column("title", sa.Text(), nullable=True),
         sa.Column("author", sa.Text(), nullable=True),
-        sa.Column("published_at", sa.DateTime(), nullable=True),
+        sa.Column("published_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("raw_text", sa.Text(), nullable=True),
         sa.Column("metadata", postgresql.JSONB(), nullable=True),
         sa.Column("fingerprint", sa.Text(), nullable=True),
-        sa.Column("fetched_at", sa.DateTime(), nullable=False),
+        sa.Column("fetched_at", sa.DateTime(timezone=True), nullable=False),
         sa.UniqueConstraint("source_id", "external_id"),
     )
 
@@ -61,7 +61,7 @@ def upgrade() -> None:
         sa.Column("status", sa.Text(), nullable=False),
         sa.Column("json_payload", postgresql.JSONB(), nullable=True),
         sa.Column("pdf_path", sa.Text(), nullable=True),
-        sa.Column("delivered_at", sa.DateTime(), nullable=True),
+        sa.Column("delivered_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("metrics", postgresql.JSONB(), nullable=True),
     )
 
@@ -81,7 +81,7 @@ def upgrade() -> None:
         sa.Column("target", sa.Text(), nullable=True),
         sa.Column("status", sa.Text(), nullable=False),
         sa.Column("error", sa.Text(), nullable=True),
-        sa.Column("attempted_at", sa.DateTime(), nullable=False),
+        sa.Column("attempted_at", sa.DateTime(timezone=True), nullable=False),
     )
 
 

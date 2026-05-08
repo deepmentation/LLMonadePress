@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Date, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import Date, DateTime, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+def _now_utc() -> datetime:
+    return datetime.now(UTC)
 
 
 class Base(DeclarativeBase):
@@ -22,7 +26,7 @@ class Source(Base):
     display_name: Mapped[str | None] = mapped_column(Text)
     config: Mapped[dict] = mapped_column(JSONB, default=dict)
     enabled: Mapped[bool] = mapped_column(default=True)
-    last_fetched: Mapped[datetime | None] = mapped_column()
+    last_fetched: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     items: Mapped[list[Item]] = relationship(back_populates="source")
 
@@ -37,12 +41,12 @@ class Item(Base):
     url: Mapped[str] = mapped_column(Text)
     title: Mapped[str | None] = mapped_column(Text)
     author: Mapped[str | None] = mapped_column(Text)
-    published_at: Mapped[datetime | None] = mapped_column()
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     raw_text: Mapped[str | None] = mapped_column(Text)
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB)
     fingerprint: Mapped[str | None] = mapped_column(Text)
     embedding = mapped_column(Vector(1024), nullable=True)
-    fetched_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now_utc)
 
     source: Mapped[Source] = relationship(back_populates="items")
     edition_links: Mapped[list[EditionItem]] = relationship(back_populates="item")
@@ -57,7 +61,7 @@ class Edition(Base):
     status: Mapped[str] = mapped_column(Text)  # rendering | ready | delivered | failed
     json_payload: Mapped[dict | None] = mapped_column(JSONB)
     pdf_path: Mapped[str | None] = mapped_column(Text)
-    delivered_at: Mapped[datetime | None] = mapped_column()
+    delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     metrics: Mapped[dict | None] = mapped_column(JSONB)
 
     item_links: Mapped[list[EditionItem]] = relationship(back_populates="edition")
@@ -85,6 +89,6 @@ class Delivery(Base):
     target: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(Text)  # pending | success | failed
     error: Mapped[str | None] = mapped_column(Text)
-    attempted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now_utc)
 
     edition: Mapped[Edition] = relationship(back_populates="deliveries")
