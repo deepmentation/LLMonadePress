@@ -1,0 +1,97 @@
+from __future__ import annotations
+
+import tomllib
+from pathlib import Path
+
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class UserConfig(BaseModel):
+    timezone: str = "Europe/Berlin"
+    delivery_time: str = "06:30"
+    language: str = "de"
+    max_stories: int = 12
+
+
+class LLMConfig(BaseModel):
+    ranker_model: str = "anthropic/claude-haiku-4-5"
+    writer_model: str = "anthropic/claude-sonnet-4-6"
+    embedding_model: str = "openai/text-embedding-3-small"
+    api_keys_env: bool = True
+
+
+class ASRConfig(BaseModel):
+    backend: str = "faster-whisper"
+    model_size: str = "medium"
+    language: str = "auto"
+
+
+class RemarkableDeliveryConfig(BaseModel):
+    enabled: bool = False
+    device_profile: str = "remarkable_ppm"
+    folder: str = "Newspaper"
+    keep_days: int = 30
+
+
+class FilesystemDeliveryConfig(BaseModel):
+    enabled: bool = True
+    output_dir: str = "/app/output"
+
+
+class EmailDeliveryConfig(BaseModel):
+    enabled: bool = False
+    device_profile: str = "kindle_paperwhite"
+    to: list[str] = Field(default_factory=list)
+    from_name: str = "Lemonade Daily"
+    subject_template: str = "Lemonade — {date:%A, %d. %B %Y}"
+    attach_pdf: bool = True
+    include_summary_in_body: bool = True
+
+
+class DeliveryConfig(BaseModel):
+    devices: list[str] = Field(default_factory=lambda: ["generic_a5"])
+    remarkable: RemarkableDeliveryConfig = Field(default_factory=RemarkableDeliveryConfig)
+    filesystem: FilesystemDeliveryConfig = Field(default_factory=FilesystemDeliveryConfig)
+    email: EmailDeliveryConfig = Field(default_factory=EmailDeliveryConfig)
+
+
+class RSSSource(BaseModel):
+    url: str
+    category: str = "General"
+    follow_links: bool = False
+
+
+class YouTubeSource(BaseModel):
+    channel_id: str | None = None
+    channel_handle: str | None = None
+    category: str = "General"
+    min_duration_s: int = 0
+
+
+class SMTPSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="LEMONADE_SMTP_",
+        populate_by_name=True,
+    )
+
+    host: str = ""
+    port: int = 587
+    user: str = ""
+    password: str = ""
+    from_addr: str = Field(default="", validation_alias="LEMONADE_SMTP_FROM")
+
+
+class LemonadeConfig(BaseModel):
+    user: UserConfig = Field(default_factory=UserConfig)
+    llm: LLMConfig = Field(default_factory=LLMConfig)
+    asr: ASRConfig = Field(default_factory=ASRConfig)
+    delivery: DeliveryConfig = Field(default_factory=DeliveryConfig)
+    rss: list[RSSSource] = Field(default_factory=list)
+    youtube: list[YouTubeSource] = Field(default_factory=list)
+
+
+def load_config(path: Path = Path("config.toml")) -> LemonadeConfig:
+    with open(path, "rb") as f:
+        data = tomllib.load(f)
+    return LemonadeConfig.model_validate(data)
