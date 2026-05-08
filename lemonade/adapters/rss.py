@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from email.utils import parsedate_to_datetime
 
 import feedparser
@@ -39,14 +39,14 @@ class RSSAdapter(SourceAdapter):
             val = entry.get(field)
             if val:
                 try:
-                    return parsedate_to_datetime(val).astimezone(timezone.utc)
+                    return parsedate_to_datetime(val).astimezone(UTC)
                 except Exception:
                     pass
             parsed = entry.get(f"{field}_parsed")
             if parsed:
                 try:
                     from time import mktime
-                    return datetime.fromtimestamp(mktime(parsed), tz=timezone.utc)
+                    return datetime.fromtimestamp(mktime(parsed), tz=UTC)
                 except Exception:
                     pass
         return None

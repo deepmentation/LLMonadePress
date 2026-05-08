@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from lemonade.adapters.base import FetchedItem
@@ -80,7 +79,7 @@ async def _embed_items(
 
 async def ingest(config: LemonadeConfig, session: AsyncSession) -> list[Item]:
     """Run the full ingestion pipeline: fetch from all sources, store, embed."""
-    since = datetime.now(timezone.utc) - timedelta(hours=48)
+    since = datetime.now(UTC) - timedelta(hours=48)
     all_new_items: list[Item] = []
 
     rss_adapter = RSSAdapter()
@@ -92,7 +91,7 @@ async def ingest(config: LemonadeConfig, session: AsyncSession) -> list[Item]:
             fetched = await rss_adapter.fetch(src.url, src.model_dump(), since)
             new_items = await _store_items(session, source, fetched)
             all_new_items.extend(new_items)
-            source.last_fetched = datetime.now(timezone.utc)
+            source.last_fetched = datetime.now(UTC)
             logger.info("RSS %s: %d new items", src.url, len(new_items))
         except Exception:
             logger.exception("Failed to ingest RSS source %s", src.url)
@@ -107,7 +106,7 @@ async def ingest(config: LemonadeConfig, session: AsyncSession) -> list[Item]:
             fetched = await yt_adapter.fetch(identifier, src.model_dump(), since)
             new_items = await _store_items(session, source, fetched)
             all_new_items.extend(new_items)
-            source.last_fetched = datetime.now(timezone.utc)
+            source.last_fetched = datetime.now(UTC)
             logger.info("YouTube %s: %d new items", identifier, len(new_items))
         except Exception:
             logger.exception("Failed to ingest YouTube source %s", identifier)

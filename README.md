@@ -10,13 +10,13 @@
 
 ## What is Lemonade?
 
-Lemonade is a self-hosted, AI-powered daily newspaper generator. It pulls content from your RSS feeds and YouTube channels, clusters and ranks stories with an LLM, and renders device-optimized PDFs for E-Ink tablets like the reMarkable or Kindle Paperwhite. It is LLM-provider-neutral via LiteLLM — use Anthropic, OpenAI, Ollama, Groq, or any other supported provider.
+Lemonade is a self-hosted, AI-powered daily newspaper generator. It pulls content from your RSS feeds and YouTube channels, clusters and ranks stories with an LLM, and renders device-optimized PDFs for E-Ink tablets like the reMarkable or Kindle Paperwhite. It is LLM-provider-neutral via LiteLLM — use Anthropic, OpenAI, Ollama, Groq, OpenRouter, or any other supported provider.
 
 ## Features
 
 - **RSS + YouTube sources** — subscribe to any RSS/Atom feed or YouTube channel
 - **3-tier YouTube transcript fallback** — native captions → auto-generated captions → Whisper ASR (local or cloud)
-- **LLM-powered curation** — clustering, ranking, and article writing via [LiteLLM](https://github.com/BerriAI/litellm) (Anthropic, OpenAI, Ollama, Groq, and more)
+- **LLM-powered curation** — clustering, ranking, and article writing via [LiteLLM](https://github.com/BerriAI/litellm) (Anthropic, OpenAI, Ollama, Groq, OpenRouter, and more)
 - **Device-optimized PDFs** — rendered with [Typst](https://typst.app/), tailored to each screen's dimensions, margins, and typography
 - **6 device profiles** — reMarkable Paper Pro Move, Paper Pro, reMarkable 2, Kindle Paperwhite, iPad mini, generic A5
 - **3 delivery channels** — reMarkable Cloud (via rmapi), filesystem (Syncthing/Dropbox/USB), email (with Send-to-Kindle support)

@@ -16,10 +16,13 @@ max_stories    = 12
 # ─── LLM-Konfiguration ─────────────────────────────────────────────────────
 [llm]
 # LiteLLM-Provider-Strings — austauschbar zwischen Cloud und Lokal:
-#   "anthropic/claude-sonnet-4-6"      (Anthropic Cloud)
-#   "openai/gpt-5"                     (OpenAI Cloud)
-#   "ollama/qwen3:32b"                 (Lokal via Ollama)
-#   "groq/llama-3.3-70b-versatile"     (Groq Cloud)
+#   "anthropic/claude-sonnet-4-6"                   (Anthropic Cloud)
+#   "openai/gpt-5"                                  (OpenAI Cloud)
+#   "ollama/qwen3:32b"                              (Lokal via Ollama)
+#   "groq/llama-3.3-70b-versatile"                  (Groq Cloud)
+#   "openrouter/anthropic/claude-sonnet-4"          (OpenRouter — ein API-Key fuer alle Modelle)
+#   "openrouter/meta-llama/llama-3.3-70b-instruct"  (OpenRouter)
+# OpenRouter benoetigt OPENROUTER_API_KEY in der Umgebung.
 
 # Modell fuer Clustering und Ranking (schnell + guenstig)
 ranker_model    = "anthropic/claude-haiku-4-5"

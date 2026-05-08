@@ -10,7 +10,7 @@ Lemonade generates personalized PDF newspapers from RSS feeds and YouTube channe
 - **CLI:** Typer
 - **Database:** PostgreSQL 16 + pgvector (via SQLAlchemy async + asyncpg)
 - **Migrations:** Alembic
-- **LLM:** LiteLLM (provider-neutral — Anthropic, OpenAI, Ollama, Groq, etc.)
+- **LLM:** LiteLLM (provider-neutral — Anthropic, OpenAI, Ollama, Groq, OpenRouter, etc.)
 - **PDF Rendering:** Typst (templates + device profiles as JSON/YAML inputs)
 - **RSS:** feedparser + trafilatura (fulltext extraction)
 - **YouTube:** youtube-transcript-api + yt-dlp + faster-whisper (3-tier transcript fallback)

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import asdict
-from datetime import date, datetime, timezone
+from datetime import date, datetime, UTC
 from pathlib import Path
 
 from sqlalchemy import select
@@ -16,7 +15,7 @@ from lemonade.delivery.filesystem import FilesystemDelivery
 from lemonade.delivery.remarkable import RemarkableDelivery
 from lemonade.llm.client import LLMClient
 from lemonade.models import Delivery, Edition, EditionItem, Item
-from lemonade.pipeline.cluster import Cluster, cluster_items
+from lemonade.pipeline.cluster import cluster_items
 from lemonade.pipeline.ingest import ingest
 from lemonade.pipeline.rank import rank_clusters
 from lemonade.pipeline.write import WrittenStory, write_edition
@@ -94,7 +93,7 @@ async def _deliver(
         try:
             await ch.deliver(pdf_path, edition_date, device)
             delivery.status = "success"
-            delivery.attempted_at = datetime.now(timezone.utc)
+            delivery.attempted_at = datetime.now(UTC)
             logger.info("Delivered via %s", ch.name)
         except Exception as exc:
             delivery.status = "failed"
@@ -208,7 +207,7 @@ async def run_pipeline(
 
             if deliver:
                 await _deliver(config, pdf_path, date_str, device_id, session, edition)
-                edition.delivered_at = datetime.now(timezone.utc)
+                edition.delivered_at = datetime.now(UTC)
                 edition.status = "delivered"
 
             edition_ids.append(edition.id)

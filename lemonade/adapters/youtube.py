@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 import re
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 import feedparser
 
@@ -59,7 +58,7 @@ class YouTubeAdapter(SourceAdapter):
             if val:
                 try:
                     from email.utils import parsedate_to_datetime
-                    return parsedate_to_datetime(val).astimezone(timezone.utc)
+                    return parsedate_to_datetime(val).astimezone(UTC)
                 except Exception:
                     try:
                         return datetime.fromisoformat(val.replace("Z", "+00:00"))
