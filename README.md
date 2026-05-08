@@ -120,6 +120,7 @@ Good first contributions:
 - Add a new device profile (just a YAML file + a test)
 - Improve Typst templates
 - Add a new delivery channel
+- Add a translation
 
 ## License
 

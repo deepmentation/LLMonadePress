@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS base
+FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 
@@ -17,13 +17,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
     rm -rf "/tmp/typst-${TYPST_ARCH}" && \
     apt-get purge -y curl xz-utils && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
-FROM base AS builder
-COPY pyproject.toml .
+# Copy project sources before install so hatchling can find the package
+COPY pyproject.toml README.md ./
+COPY lemonade/ ./lemonade/
+COPY device_profiles/ ./device_profiles/
+COPY templates/ ./templates/
+COPY alembic/ ./alembic/
+COPY alembic.ini ./
+
 RUN pip install --no-cache-dir .
 
-FROM base AS runtime
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY . .
 ENTRYPOINT ["lemonade"]
 CMD ["run"]

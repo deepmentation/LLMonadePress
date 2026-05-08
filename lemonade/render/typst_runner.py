@@ -4,9 +4,8 @@ import json
 import subprocess
 from pathlib import Path
 
+from lemonade._paths import templates_dir
 from lemonade.render.profiles import DeviceProfile
-
-TEMPLATES_DIR = Path(__file__).parent.parent.parent / "templates"
 
 
 def render_pdf(
@@ -15,7 +14,7 @@ def render_pdf(
     output_path: Path,
     template: Path | None = None,
 ) -> Path:
-    template = template or TEMPLATES_DIR / "newspaper.typ"
+    template = template or templates_dir() / "newspaper.typ"
     if not template.exists():
         raise FileNotFoundError(f"Template not found: {template}")
 

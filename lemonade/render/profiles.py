@@ -5,6 +5,8 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel
 
+from lemonade._paths import profiles_dir
+
 
 class PageConfig(BaseModel):
     width_mm: float
@@ -50,11 +52,12 @@ class DeviceProfile(BaseModel):
     delivery: DeliveryProfileConfig = DeliveryProfileConfig()
 
 
-PROFILES_DIR = Path(__file__).parent.parent.parent / "device_profiles"
+def _resolve_dir(override: Path | None) -> Path:
+    return override if override is not None else profiles_dir()
 
 
-def load_profile(profile_id: str, profiles_dir: Path | None = None) -> DeviceProfile:
-    directory = profiles_dir or PROFILES_DIR
+def load_profile(profile_id: str, override_dir: Path | None = None) -> DeviceProfile:
+    directory = _resolve_dir(override_dir)
     path = directory / f"{profile_id}.yaml"
     if not path.exists():
         raise FileNotFoundError(f"Device profile not found: {path}")
@@ -63,8 +66,8 @@ def load_profile(profile_id: str, profiles_dir: Path | None = None) -> DevicePro
     return DeviceProfile.model_validate(data)
 
 
-def list_profiles(profiles_dir: Path | None = None) -> list[DeviceProfile]:
-    directory = profiles_dir or PROFILES_DIR
+def list_profiles(override_dir: Path | None = None) -> list[DeviceProfile]:
+    directory = _resolve_dir(override_dir)
     profiles = []
     for path in sorted(directory.glob("*.yaml")):
         with open(path) as f:

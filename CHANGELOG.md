@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-08
+
+### Fixed
+- Docker build now succeeds. The previous Dockerfile copied only
+  `pyproject.toml` before `pip install .`, leaving hatchling without sources to
+  build a wheel from. Sources, profiles, templates, and Alembic migrations are
+  now copied before install, and `[tool.hatch.build.targets.wheel].packages`
+  declares the package explicitly.
+- `device_profiles/` and `templates/` are now bundled into the wheel under
+  `lemonade/_bundled/` via `force-include`, so installed installations find
+  them without depending on the repo layout.
+- New `lemonade/_paths.py` resolves data directories with a clean precedence:
+  `LEMONADE_PROFILES_DIR` / `LEMONADE_TEMPLATES_DIR` env override → bundled
+  copy → repo-root copy. Editable installs and pip installs both work.
+
+### Added
+- `.dockerignore` to keep `.venv/`, caches, and tests out of the build context
+  (build context dropped from ~580 MB to a few MB).
+
 ## [0.1.1] — 2026-05-08
 
 ### Added
@@ -67,6 +86,7 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/lemonade-newspaper/lemonade/releases/tag/v0.1.0

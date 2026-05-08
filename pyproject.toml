@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lemonade"
-version = "0.1.1"
+version = "0.1.2"
 description = "AI-powered daily newspaper generator for E-Ink tablets and beyond"
 license = "MIT"
 requires-python = ">=3.12"
@@ -50,6 +50,16 @@ dev = [
     "factory-boy>=3.3",
     "testcontainers[postgres]>=4.4",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["lemonade"]
+
+# Bundle device profiles and Typst templates into the wheel under
+# lemonade/_bundled/ so the package is self-contained when pip-installed.
+# In editable mode the loader falls back to the repo-root copies.
+[tool.hatch.build.targets.wheel.force-include]
+"device_profiles" = "lemonade/_bundled/device_profiles"
+"templates" = "lemonade/_bundled/templates"
 
 # Lemonade project-level metadata. The list of output languages here is the
 # single source of truth — adding a language requires:

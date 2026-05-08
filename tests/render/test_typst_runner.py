@@ -22,19 +22,17 @@ def sample_edition():
 
 def test_render_pdf_calls_typst(sample_profile, sample_edition, tmp_path):
     mock_result = MagicMock(returncode=0, stderr="", stdout="")
+    template = tmp_path / "newspaper.typ"
+    template.touch()
     with patch("lemonade.render.typst_runner.subprocess.run", return_value=mock_result) as mock_run:
-        with patch("lemonade.render.typst_runner.TEMPLATES_DIR", tmp_path):
-            (tmp_path / "newspaper.typ").touch()
-            output = tmp_path / "out.pdf"
-            render_pdf(sample_edition, sample_profile, output, template=tmp_path / "newspaper.typ")
-            mock_run.assert_called_once()
-            args = mock_run.call_args[0][0]
-            assert args[0] == "typst"
+        render_pdf(sample_edition, sample_profile, tmp_path / "out.pdf", template=template)
+        mock_run.assert_called_once()
+        assert mock_run.call_args[0][0][0] == "typst"
 
 def test_render_pdf_raises_on_failure(sample_profile, sample_edition, tmp_path):
     mock_result = MagicMock(returncode=1, stderr="error", stdout="")
+    template = tmp_path / "newspaper.typ"
+    template.touch()
     with patch("lemonade.render.typst_runner.subprocess.run", return_value=mock_result):
-        with patch("lemonade.render.typst_runner.TEMPLATES_DIR", tmp_path):
-            (tmp_path / "newspaper.typ").touch()
-            with pytest.raises(RuntimeError, match="Typst compilation failed"):
-                render_pdf(sample_edition, sample_profile, tmp_path / "out.pdf", template=tmp_path / "newspaper.typ")
+        with pytest.raises(RuntimeError, match="Typst compilation failed"):
+            render_pdf(sample_edition, sample_profile, tmp_path / "out.pdf", template=template)
