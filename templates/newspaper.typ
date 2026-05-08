@@ -1,5 +1,6 @@
-#let edition = json.decode(sys.inputs.at("edition"))
-#let profile = json.decode(sys.inputs.at("profile"))
+// JSON payloads are written to sibling files by lemonade.render.typst_runner.
+#let edition = json("edition.json")
+#let profile = json("profile.json")
 
 #set page(
   width: profile.page.width_mm * 1mm,
@@ -15,7 +16,7 @@
 #set text(
   font: profile.typography.body_family,
   size: profile.typography.body_size_pt * 1pt,
-  lang: edition.at("language", default: "de"),
+  lang: edition.at("language", default: "en"),
 )
 
 #import "components/cover.typ": cover-page
@@ -24,20 +25,19 @@
 
 #cover-page(edition, profile)
 
-#let all-stories = ()
-#if "lead_story" in edition {
-  all-stories.push(edition.lead_story)
-}
-#if "sections" in edition {
-  for section in edition.sections {
-    for story in section.at("stories", default: ()) {
-      all-stories.push(story)
-    }
-  }
+#let lead = edition.at("lead_story", default: none)
+#if lead != none {
+  story-block(lead, profile)
 }
 
-#for story in all-stories {
-  story-block(story, profile)
+#for section in edition.at("sections", default: ()) {
+  let stories = section.at("stories", default: ())
+  if stories.len() > 0 {
+    heading(level: 1)[#section.at("name", default: "")]
+    for story in stories {
+      story-block(story, profile)
+    }
+  }
 }
 
 #colophon-page(edition, profile)

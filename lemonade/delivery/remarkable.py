@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import shutil
 from pathlib import Path
 
 from lemonade.delivery.base import DeliveryChannel
@@ -13,6 +14,12 @@ class RemarkableDelivery(DeliveryChannel):
         self.folder = folder
 
     async def deliver(self, pdf_path: Path, edition_date: str, device: str) -> None:
+        if shutil.which("rmapi") is None:
+            raise RuntimeError(
+                "rmapi binary not found in PATH. Install ddvk/rmapi and run "
+                "`rmapi` once to authenticate, or disable [delivery.remarkable] "
+                "in config.toml."
+            )
         target = f"/{self.folder}/{edition_date[:7]}/"
         await self._rmapi("mkdir", "-p", target)
         await self._rmapi("put", str(pdf_path), target)

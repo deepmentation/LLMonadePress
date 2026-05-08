@@ -25,24 +25,57 @@ from lemonade.render.typst_runner import render_pdf
 logger = logging.getLogger(__name__)
 
 
-def _build_edition_json(
-    stories: list[WrittenStory], edition_date: date, device: str
-) -> dict:
+def _story_dict(s: WrittenStory) -> dict:
     return {
-        "date": edition_date.isoformat(),
-        "device": device,
-        "stories": [
-            {
-                "headline": s.headline,
-                "deck": s.deck,
-                "body": s.body,
-                "category": s.category,
-                "sources": s.sources,
-                "pull_quote": s.pull_quote,
-            }
-            for s in stories
-        ],
+        "headline": s.headline,
+        "deck": s.deck,
+        "body": s.body,
+        "category": s.category,
+        "sources": s.sources,
+        "pull_quote": s.pull_quote,
     }
+
+
+def _build_edition_json(
+    stories: list[WrittenStory],
+    edition_date: date,
+    device: str,
+    language: str,
+    rss_count: int = 0,
+    youtube_count: int = 0,
+) -> dict:
+    """Assemble the edition payload consumed by templates/newspaper.typ.
+
+    Schema (must stay in sync with templates):
+      edition_date, device, language: scalars
+      lead_story: top-ranked story (or None)
+      sections: list of {name, stories[]} grouped by category
+      metadata: {sources_count: {rss, youtube}}
+    """
+    lead = stories[0] if stories else None
+    rest = stories[1:] if stories else []
+
+    by_category: dict[str, list[WrittenStory]] = {}
+    for s in rest:
+        by_category.setdefault(s.category or "General", []).append(s)
+
+    sections = [
+        {"name": name, "stories": [_story_dict(s) for s in items]}
+        for name, items in by_category.items()
+    ]
+
+    payload: dict = {
+        "edition_date": edition_date.isoformat(),
+        "device": device,
+        "language": language,
+        "sections": sections,
+        "metadata": {
+            "sources_count": {"rss": rss_count, "youtube": youtube_count},
+        },
+    }
+    if lead is not None:
+        payload["lead_story"] = _story_dict(lead)
+    return payload
 
 
 async def _deliver(
@@ -63,19 +96,27 @@ async def _deliver(
 
     if config.delivery.email.enabled:
         smtp = SMTPSettings()
-        channels.append(
-            EmailDelivery(
-                host=smtp.host,
-                port=smtp.port,
-                user=smtp.user,
-                password=smtp.password,
-                from_addr=smtp.from_addr,
-                from_name=config.delivery.email.from_name,
-                to=config.delivery.email.to,
-                subject_template=config.delivery.email.subject_template,
-                include_summary=config.delivery.email.include_summary_in_body,
+        if not (smtp.host and smtp.user and smtp.password and smtp.from_addr):
+            logger.warning(
+                "Email delivery enabled but SMTP settings are incomplete "
+                "(LEMONADE_SMTP_{HOST,USER,PASS,FROM} env vars). Skipping."
             )
-        )
+        elif not config.delivery.email.to:
+            logger.warning("Email delivery enabled but no recipients configured. Skipping.")
+        else:
+            channels.append(
+                EmailDelivery(
+                    host=smtp.host,
+                    port=smtp.port,
+                    user=smtp.user,
+                    password=smtp.password,
+                    from_addr=smtp.from_addr,
+                    from_name=config.delivery.email.from_name,
+                    to=config.delivery.email.to,
+                    subject_template=config.delivery.email.subject_template,
+                    include_summary=config.delivery.email.include_summary_in_body,
+                )
+            )
 
     if config.delivery.remarkable.enabled:
         channels.append(
@@ -166,7 +207,14 @@ async def run_pipeline(
         # 6. Render + deliver per device
         for device_id in devices:
             profile = load_profile(device_id)
-            edition_json = _build_edition_json(stories, edition_date, device_id)
+            edition_json = _build_edition_json(
+                stories,
+                edition_date,
+                device_id,
+                language=config.user.language,
+                rss_count=len(config.rss),
+                youtube_count=len(config.youtube),
+            )
 
             output_dir = Path(config.delivery.filesystem.output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)

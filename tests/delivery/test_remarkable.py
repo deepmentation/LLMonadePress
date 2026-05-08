@@ -9,10 +9,21 @@ async def test_remarkable_delivery(tmp_path):
     pdf.write_bytes(b"%PDF-1.4")
 
     channel = RemarkableDelivery(folder="Newspaper")
-    with patch.object(channel, "_rmapi", new_callable=AsyncMock) as mock_rmapi:
+    with patch.object(channel, "_rmapi", new_callable=AsyncMock) as mock_rmapi, \
+         patch("lemonade.delivery.remarkable.shutil.which", return_value="/usr/bin/rmapi"):
         await channel.deliver(pdf, "2026-05-08", "remarkable_ppm")
         assert mock_rmapi.call_count == 3
         mock_rmapi.assert_any_call("mkdir", "-p", "/Newspaper/2026-05/")
+
+
+@pytest.mark.asyncio
+async def test_remarkable_missing_binary(tmp_path):
+    pdf = tmp_path / "test.pdf"
+    pdf.write_bytes(b"%PDF-1.4")
+    channel = RemarkableDelivery()
+    with patch("lemonade.delivery.remarkable.shutil.which", return_value=None):
+        with pytest.raises(RuntimeError, match="rmapi binary not found"):
+            await channel.deliver(pdf, "2026-05-08", "remarkable_ppm")
 
 @pytest.mark.asyncio
 async def test_remarkable_rmapi_failure():

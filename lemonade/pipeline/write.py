@@ -33,6 +33,12 @@ async def write_story(
         model=model,
         system=build_write_system(language),
     )
+    # Some models (esp. Sonnet via OpenRouter) wrap a single object in a
+    # one-element list. Unwrap defensively before accessing fields.
+    if isinstance(result, list):
+        result = result[0] if result else {}
+    if not isinstance(result, dict):
+        result = {}
     story = WrittenStory(
         headline=result.get("headline", ""),
         deck=result.get("deck", ""),

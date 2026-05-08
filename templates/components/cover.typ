@@ -15,17 +15,19 @@
 
   v(2em)
 
-  if "lead_story" in edition {
+  let lead = edition.at("lead_story", default: none)
+  if lead != none {
     text(
       font: profile.typography.heading_family,
       size: profile.typography.heading_h2_pt * 1pt,
       weight: "bold",
-    )[#edition.lead_story.headline]
+    )[#lead.at("headline", default: "")]
 
     v(0.5em)
 
-    if "deck" in edition.lead_story {
-      text(style: "italic")[#edition.lead_story.deck]
+    let deck = lead.at("deck", default: "")
+    if deck != "" {
+      text(style: "italic")[#deck]
     }
   }
 

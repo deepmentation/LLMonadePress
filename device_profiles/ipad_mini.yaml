@@ -8,10 +8,10 @@ page:
   margin_inner_mm: 12
   margin_outer_mm: 12
 typography:
-  body_family: "Source Serif 4"
+  body_family: "DejaVu Serif"
   body_size_pt: 11
   body_leading_pt: 14.5
-  heading_family: "Inter"
+  heading_family: "DejaVu Sans"
   heading_h1_pt: 22
   heading_h2_pt: 16
 color:

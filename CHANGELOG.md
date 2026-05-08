@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-08
+
+### First end-to-end working release 🎉
+The pipeline now produces real PDFs on real data with cloud or local LLMs.
+
+### Fixed (proactive review pass)
+- **Edition JSON schema**: `_build_edition_json()` now produces the schema
+  the Typst templates actually consume (`edition_date`, `language`,
+  `lead_story`, `sections[]`, `metadata.sources_count`). Previously the
+  pipeline produced `date`/`stories` and rendering would have crashed
+  on first try.
+- **Language end-to-end**: the configured `[user] language` now flows
+  into the edition JSON so templates render in the chosen language.
+- **Typst ARG_MAX overflow**: large editions blew past the shell argv
+  limit when the JSON was passed via `--input`. Renderer now writes
+  `edition.json` and `profile.json` next to a copied template tree and
+  templates read them via Typst's native `json("…")` function.
+- **Robust JSON extraction**: `_extract_json()` now tries the raw text,
+  ` ```json ` fences, then `{…}` and `[…]` spans in turn. Anthropic
+  Sonnet's habit of wrapping JSON in fences (and sometimes returning a
+  one-element list instead of an object) no longer breaks the pipeline.
+- **`max_tokens` default raised to 8192** for `complete_json()` so writer
+  outputs aren't truncated mid-JSON.
+- **Empty SMTP early skip**: email delivery now logs a warning and skips
+  itself instead of crashing when `LEMONADE_SMTP_*` env vars are missing
+  but `delivery.email.enabled = true`.
+- **`rmapi` pre-flight check**: friendly error before invoking subprocess
+  if the binary isn't installed (instead of an opaque `FileNotFoundError`).
+- **`completion_cost` failures non-fatal**: LiteLLM's pricing database
+  lags new model releases, so an unknown-model lookup no longer crashes
+  a successful completion.
+- **Lead-story null safety** in `cover.typ` — uses `default: none`
+  guards instead of dict-membership checks.
+
+### Changed
+- **Default fonts switched to DejaVu** (Serif/Sans). DejaVu ships in
+  `fonts-dejavu-core`, is bundled in the Docker image, and covers
+  Latin/Cyrillic/Greek with full diacritics. Source Serif 4 / Inter were
+  unavailable in the slim Debian base image. Override per profile if you
+  bundle other fonts via `templates/fonts/` (the runner now sets
+  `TYPST_FONT_PATHS` automatically when that directory exists).
+- **Dockerfile** installs `fonts-dejavu-core fonts-dejavu-extra
+  fonts-noto-core` so default profiles render out of the box.
+
 ## [0.1.6] — 2026-05-08
 
 ### Added
@@ -167,7 +211,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...v0.2.0
 [0.1.6]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...v0.1.4

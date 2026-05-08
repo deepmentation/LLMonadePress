@@ -2,9 +2,13 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 
-# Install Typst from official GitHub release
+# Install Typst (from GitHub release) plus a portable set of fonts so the
+# default profile typography renders out of the box. DejaVu covers Latin /
+# Cyrillic / Greek; Noto adds wider Unicode fallback (CJK fragments, symbols).
 ARG TYPST_VERSION=0.12.0
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates xz-utils && \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl ca-certificates xz-utils \
+        fonts-dejavu-core fonts-dejavu-extra fonts-noto-core && \
     ARCH="$(dpkg --print-architecture)" && \
     case "$ARCH" in \
         amd64) TYPST_ARCH="x86_64-unknown-linux-musl" ;; \

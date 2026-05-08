@@ -22,5 +22,13 @@ async def rank_clusters(
         model=model,
         system=build_rank_system(language),
     )
-    ranked = result.get("ranked", [])[:max_stories]
+    # Accept either {"ranked": [...]} or a bare list of ranked entries —
+    # different providers and prompt-following levels produce both shapes.
+    if isinstance(result, list):
+        items = result
+    elif isinstance(result, dict):
+        items = result.get("ranked") or result.get("clusters") or []
+    else:
+        items = []
+    ranked = list(items)[:max_stories]
     return ranked, response

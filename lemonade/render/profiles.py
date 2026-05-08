@@ -18,10 +18,13 @@ class PageConfig(BaseModel):
 
 
 class TypographyConfig(BaseModel):
-    body_family: str = "Source Serif 4"
+    # DejaVu fonts ship in fonts-dejavu-core (~3 MB) and are bundled in our
+    # Docker image. They cover Latin/Cyrillic/Greek with full diacritics —
+    # solid default for DE/EN/FR. Override per profile if you bundle others.
+    body_family: str = "DejaVu Serif"
     body_size_pt: float = 11
     body_leading_pt: float = 14.5
-    heading_family: str = "Inter"
+    heading_family: str = "DejaVu Sans"
     heading_h1_pt: float = 22
     heading_h2_pt: float = 16
 
