@@ -1,0 +1,26 @@
+id: remarkable_2
+display_name: "reMarkable 2"
+page:
+  width_mm: 157
+  height_mm: 209
+  margin_top_mm: 14
+  margin_bottom_mm: 16
+  margin_inner_mm: 12
+  margin_outer_mm: 12
+typography:
+  body_family: "Source Serif 4"
+  body_size_pt: 11
+  body_leading_pt: 15
+  heading_family: "Inter"
+  heading_h1_pt: 24
+  heading_h2_pt: 18
+color:
+  enabled: false
+  palette: "mono"
+rendering:
+  embed_bookmarks: true
+  hyperlinks: "footnote"
+  image_max_width_pct: 90
+  image_dither: "floyd_steinberg"
+delivery:
+  default_channel: "remarkable_cloud"

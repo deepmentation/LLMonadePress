@@ -1,0 +1,26 @@
+id: remarkable_ppm
+display_name: "reMarkable Paper Pro Move"
+page:
+  width_mm: 107.8
+  height_mm: 195.6
+  margin_top_mm: 12
+  margin_bottom_mm: 14
+  margin_inner_mm: 10
+  margin_outer_mm: 10
+typography:
+  body_family: "Source Serif 4"
+  body_size_pt: 11
+  body_leading_pt: 14.5
+  heading_family: "Inter"
+  heading_h1_pt: 22
+  heading_h2_pt: 16
+color:
+  enabled: true
+  palette: "muted"
+rendering:
+  embed_bookmarks: true
+  hyperlinks: "short_url"
+  image_max_width_pct: 100
+  image_dither: "floyd_steinberg"
+delivery:
+  default_channel: "remarkable_cloud"

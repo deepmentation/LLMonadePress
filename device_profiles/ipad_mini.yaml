@@ -1,0 +1,26 @@
+id: ipad_mini
+display_name: "iPad mini 8.3\""
+page:
+  width_mm: 134.8
+  height_mm: 195.4
+  margin_top_mm: 12
+  margin_bottom_mm: 14
+  margin_inner_mm: 12
+  margin_outer_mm: 12
+typography:
+  body_family: "Source Serif 4"
+  body_size_pt: 11
+  body_leading_pt: 14.5
+  heading_family: "Inter"
+  heading_h1_pt: 22
+  heading_h2_pt: 16
+color:
+  enabled: true
+  palette: "vibrant"
+rendering:
+  embed_bookmarks: true
+  hyperlinks: "inline"
+  image_max_width_pct: 100
+  image_dither: "none"
+delivery:
+  default_channel: "filesystem"

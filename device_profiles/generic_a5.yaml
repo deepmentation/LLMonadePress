@@ -1,0 +1,26 @@
+id: generic_a5
+display_name: "Generic A5"
+page:
+  width_mm: 148
+  height_mm: 210
+  margin_top_mm: 15
+  margin_bottom_mm: 18
+  margin_inner_mm: 15
+  margin_outer_mm: 15
+typography:
+  body_family: "Source Serif 4"
+  body_size_pt: 11
+  body_leading_pt: 15
+  heading_family: "Inter"
+  heading_h1_pt: 24
+  heading_h2_pt: 18
+color:
+  enabled: true
+  palette: "muted"
+rendering:
+  embed_bookmarks: true
+  hyperlinks: "short_url"
+  image_max_width_pct: 100
+  image_dither: "none"
+delivery:
+  default_channel: "filesystem"

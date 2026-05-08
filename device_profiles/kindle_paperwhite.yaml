@@ -1,0 +1,26 @@
+id: kindle_paperwhite
+display_name: "Kindle Paperwhite (12th Gen)"
+page:
+  width_mm: 91
+  height_mm: 122
+  margin_top_mm: 8
+  margin_bottom_mm: 10
+  margin_inner_mm: 8
+  margin_outer_mm: 8
+typography:
+  body_family: "Source Serif 4"
+  body_size_pt: 10
+  body_leading_pt: 13
+  heading_family: "Inter"
+  heading_h1_pt: 18
+  heading_h2_pt: 14
+color:
+  enabled: false
+  palette: "mono"
+rendering:
+  embed_bookmarks: true
+  hyperlinks: "footnote"
+  image_max_width_pct: 100
+  image_dither: "floyd_steinberg"
+delivery:
+  default_channel: "email"
