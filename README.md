@@ -43,24 +43,27 @@ Device profiles are YAML files — community contributions for new devices are w
 git clone https://github.com/lemonade-newspaper/lemonade.git
 cd lemonade
 
-# 2. Set up environment
-cp .env.example .env          # add your API keys here
+# 2. Set up environment and config (BOTH files must exist before `docker compose up`,
+#    otherwise Docker's bind mount auto-creates them as empty directories).
+cp .env.example .env                          # add your API keys here
+cp examples/config.example.toml config.toml   # edit your sources & preferences
 
-# 3. Configure your sources and preferences
-cp examples/config.example.toml config.toml
+# 3. Start the database (the app container is a batch job, not a daemon)
+docker compose up -d db
 
-# 4. Start the stack
-docker compose up -d
+# 4. Initialize the schema
+docker compose run --rm app init
 
-# 5. Initialize the database
-lemonade init
+# 5. Preview a test edition (no delivery)
+docker compose run --rm app preview
 
-# 6. Preview a test edition (no delivery)
-lemonade preview
-
-# 7. Run a full edition with delivery
-lemonade run
+# 6. Run a full edition with delivery
+docker compose run --rm app run
 ```
+
+> **Cron / scheduling:** call `docker compose run --rm app run` from a host
+> cron job (or systemd timer) at your desired time. Lemonade itself is
+> stateless between runs — all state lives in Postgres.
 
 ## Configuration
 

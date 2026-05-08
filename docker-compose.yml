@@ -1,6 +1,11 @@
 services:
+  # Lemonade is a batch job, not a long-running service. The app container
+  # exists so you can invoke commands inside it via `docker compose run --rm app …`
+  # (e.g. `docker compose run --rm app run`). It is excluded from `docker compose up`
+  # via the `manual` profile so a missing config.toml doesn't put it in a crash loop.
   app:
     build: .
+    profiles: ["manual"]
     depends_on:
       db:
         condition: service_healthy

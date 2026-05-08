@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-05-08
+
+### Fixed
+- App container no longer crash-loops when `config.toml` is missing.
+  Lemonade is a batch job, not a daemon — `docker compose up` now starts
+  only the database, and pipeline runs are invoked explicitly via
+  `docker compose run --rm app …`.
+- `load_config()` raises a helpful `IsADirectoryError` when Docker's bind
+  mount has auto-created `config.toml` as an empty directory (the previous
+  failure mode), and `FileNotFoundError` with a clear next step when the
+  file is simply missing.
+
+### Changed
+- The `app` service in `docker-compose.yml` now uses the `manual` Compose
+  profile so it is excluded from `docker compose up` by default.
+- Dockerfile `CMD` defaults to `--help` (was `run`) — running with no
+  arguments now prints usage instead of attempting a pipeline run.
+- README quickstart updated to reflect the new flow and warns about the
+  bind-mount-auto-creates-empty-directory pitfall.
+
 ## [0.1.2] — 2026-05-08
 
 ### Fixed
@@ -86,7 +106,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/lemonade-newspaper/lemonade/releases/tag/v0.1.0

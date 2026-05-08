@@ -104,6 +104,19 @@ class LemonadeConfig(BaseModel):
 
 
 def load_config(path: Path = Path("config.toml")) -> LemonadeConfig:
+    path = Path(path)
+    if path.is_dir():
+        raise IsADirectoryError(
+            f"{path} exists as a directory, not a file. "
+            "This usually happens when Docker's bind mount auto-creates a "
+            "missing source path. Remove the directory and create the file: "
+            f"`rmdir {path} && cp examples/config.example.toml {path}`"
+        )
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Config file not found: {path}. "
+            "Copy examples/config.example.toml to config.toml and edit it."
+        )
     with open(path, "rb") as f:
         data = tomllib.load(f)
     return LemonadeConfig.model_validate(data)

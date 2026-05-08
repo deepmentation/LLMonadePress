@@ -25,6 +25,7 @@ ENV/
 
 # Project
 .env
+config.toml
 output/*.pdf
 *.db
 

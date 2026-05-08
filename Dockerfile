@@ -28,4 +28,4 @@ COPY alembic.ini ./
 RUN pip install --no-cache-dir .
 
 ENTRYPOINT ["lemonade"]
-CMD ["run"]
+CMD ["--help"]
