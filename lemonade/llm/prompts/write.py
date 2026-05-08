@@ -1,30 +1,30 @@
 from __future__ import annotations
 
-WRITE_SYSTEM = """Du bist ein erfahrener Zeitungsredakteur. Schreibe prägnante, informative Artikel."""
+from lemonade.llm.prompts.i18n import get_prompts
 
-def build_write_prompt(cluster: dict, language: str = "de") -> str:
-    return f"""Schreibe einen Zeitungsartikel basierend auf folgenden Quellen.
 
-Sprache: {language}
+def build_write_system(language: str) -> str:
+    return get_prompts(language).write_system
 
-Quellen:
-Titel: {cluster['title']}
-Text: {cluster['text'][:2000]}
-URLs: {', '.join(cluster.get('urls', []))}
 
-Antwort als JSON:
-{{
-  "headline": "...",
-  "deck": "...",
-  "body": "...",
-  "category": "...",
-  "sources": [{{"title": "...", "url": "...", "domain": "..."}}],
-  "pull_quote": "..."
-}}
+def build_write_prompt(cluster: dict, language: str) -> str:
+    p = get_prompts(language)
+    urls = ", ".join(cluster.get("urls", []))
 
-Regeln:
-- headline: maximal 8 Wörter
-- deck: genau 1 Satz
-- body: 80–150 Wörter, NICHT mehr
-- pull_quote: optional, max 15 Wörter
-- sources: alle verwendeten Quellen mit Domain"""
+    return (
+        p.write_intro
+        + "\n\n"
+        + f"{p.write_label_title}: {cluster['title']}\n"
+        + f"{p.write_label_text}: {cluster['text'][:2000]}\n"
+        + f"{p.write_label_urls}: {urls}\n\n"
+        + p.write_response_hint
+        + "\n\n"
+        + p.write_rules_header
+        + "\n"
+        + f"- {p.write_rule_headline}\n"
+        + f"- {p.write_rule_deck}\n"
+        + f"- {p.write_rule_body}\n"
+        + f"- {p.write_rule_pull_quote}\n"
+        + f"- {p.write_rule_sources}\n"
+        + f"- {p.write_rule_language}"
+    )

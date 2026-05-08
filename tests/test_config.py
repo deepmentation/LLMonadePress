@@ -106,7 +106,7 @@ class TestDefaults:
     def test_empty_toml(self, tmp_path: Path) -> None:
         cfg = load_config(_write_toml(tmp_path, b""))
         assert cfg.user.timezone == "Europe/Berlin"
-        assert cfg.user.language == "de"
+        assert cfg.user.language == "en"
         assert cfg.llm.writer_model == "anthropic/claude-sonnet-4-6"
         assert cfg.asr.backend == "faster-whisper"
         assert cfg.delivery.devices == ["generic_a5"]

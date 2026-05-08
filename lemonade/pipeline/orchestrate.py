@@ -150,6 +150,7 @@ async def run_pipeline(
             max_stories=config.user.max_stories,
             client=llm,
             model=config.llm.ranker_model,
+            language=config.user.language,
         )
 
         # 5. Write

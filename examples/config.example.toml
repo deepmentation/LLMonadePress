@@ -8,7 +8,8 @@
 timezone       = "Europe/Berlin"
 # Wann die Zeitung fertig sein soll (lokale Zeit)
 delivery_time  = "06:30"
-# Ausgabesprache der generierten Zeitung
+# Ausgabesprache der generierten Zeitung. Unterstuetzt: "en", "de", "fr".
+# Die Liste wird in pyproject.toml ([tool.lemonade]) gepflegt.
 language       = "de"
 # Maximale Anzahl Stories pro Ausgabe
 max_stories    = 12

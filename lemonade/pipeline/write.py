@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from lemonade.llm.client import LLMClient, LLMResponse
-from lemonade.llm.prompts.write import WRITE_SYSTEM, build_write_prompt
+from lemonade.llm.prompts.write import build_write_prompt, build_write_system
 from lemonade.pipeline.cluster import Cluster
 
 
@@ -22,7 +22,7 @@ async def write_story(
     cluster: Cluster,
     client: LLMClient,
     model: str | None = None,
-    language: str = "de",
+    language: str = "en",
 ) -> tuple[WrittenStory, LLMResponse]:
     prompt = build_write_prompt(
         {"title": cluster.title, "text": cluster.text, "urls": cluster.urls},
@@ -31,7 +31,7 @@ async def write_story(
     result, response = await client.complete_json(
         prompt=prompt,
         model=model,
-        system=WRITE_SYSTEM,
+        system=build_write_system(language),
     )
     story = WrittenStory(
         headline=result.get("headline", ""),
@@ -50,7 +50,7 @@ async def write_edition(
     ranked: list[dict],
     client: LLMClient,
     model: str | None = None,
-    language: str = "de",
+    language: str = "en",
 ) -> tuple[list[WrittenStory], list[LLMResponse]]:
     cluster_map = {c.id: c for c in clusters}
     stories = []

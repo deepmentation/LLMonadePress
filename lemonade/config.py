@@ -3,15 +3,27 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from lemonade.llm.prompts.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES
 
 
 class UserConfig(BaseModel):
     timezone: str = "Europe/Berlin"
     delivery_time: str = "06:30"
-    language: str = "de"
+    language: str = DEFAULT_LANGUAGE
     max_stories: int = 12
+
+    @field_validator("language")
+    @classmethod
+    def _validate_language(cls, v: str) -> str:
+        v = v.lower()
+        if v not in SUPPORTED_LANGUAGES:
+            raise ValueError(
+                f"Unsupported language {v!r}. Supported: {', '.join(SUPPORTED_LANGUAGES)}"
+            )
+        return v
 
 
 class LLMConfig(BaseModel):

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lemonade"
-version = "0.1.0"
+version = "0.1.1"
 description = "AI-powered daily newspaper generator for E-Ink tablets and beyond"
 license = "MIT"
 requires-python = ">=3.12"
@@ -50,6 +50,14 @@ dev = [
     "factory-boy>=3.3",
     "testcontainers[postgres]>=4.4",
 ]
+
+# Lemonade project-level metadata. The list of output languages here is the
+# single source of truth — adding a language requires:
+#   1. Adding a translation pack to lemonade/llm/prompts/i18n.py
+#   2. Adding the code to ``supported_languages`` below
+[tool.lemonade]
+default_language = "en"
+supported_languages = ["en", "de", "fr"]
 
 [tool.ruff]
 target-version = "py312"
