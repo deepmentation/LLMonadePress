@@ -10,6 +10,11 @@ services:
       db:
         condition: service_healthy
     env_file: .env
+    environment:
+      # Override .env: inside the Docker network the DB hostname is `db`,
+      # not `localhost`. The .env value uses localhost so non-Docker dev
+      # setups (running `lemonade` directly) work out of the box.
+      DATABASE_URL: postgresql+asyncpg://lemonade:${DB_PASS:-changeme}@db:5432/lemonade
     volumes:
       - ./config.toml:/app/config.toml:ro
       - ./output:/app/output

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from lemonade.models import Base
@@ -42,7 +43,14 @@ def reset_engine() -> None:
 
 
 async def init_db() -> None:
+    """Create the pgvector extension and all tables.
+
+    Idempotent — safe to call on an already-initialised database. For
+    schema changes use Alembic migrations; this command is a one-shot
+    bootstrap for fresh setups.
+    """
     async with get_engine().begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
 
 

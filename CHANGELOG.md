@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-05-08
+
+### Fixed
+- `lemonade init` no longer fails with `type "vector" does not exist`. The
+  bootstrap now runs `CREATE EXTENSION IF NOT EXISTS vector` before
+  `Base.metadata.create_all`, so a fresh Postgres database can be initialised
+  in one command. The Alembic migration already did this for managed schema
+  changes; the gap was in the convenience bootstrap path.
+- `docker-compose.yml` now overrides `DATABASE_URL` to point at the `db`
+  service hostname for the app container. The default value in `.env` keeps
+  pointing at `localhost` so non-Docker development setups still work.
+
+### Docs
+- README quickstart split into separate code blocks. zsh's
+  `interactive_comments` is off by default — trailing `# comment` text in
+  pasted multi-line snippets becomes positional arguments and produces
+  confusing errors. Each step is now its own block with prose between them.
+
 ## [0.1.3] — 2026-05-08
 
 ### Fixed
@@ -106,7 +124,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.0...v0.1.1
