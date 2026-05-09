@@ -8,14 +8,16 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from urllib.parse import urlparse
+
 from lemonade.config import LemonadeConfig, SMTPSettings
 from lemonade.db import get_session_factory
 from lemonade.delivery.email import EmailDelivery
 from lemonade.delivery.filesystem import FilesystemDelivery
 from lemonade.delivery.remarkable import RemarkableDelivery
 from lemonade.llm.client import LLMClient
-from lemonade.models import Delivery, Edition, EditionItem, Item
-from lemonade.pipeline.cluster import cluster_items
+from lemonade.models import Delivery, Edition, EditionItem, Item, Source
+from lemonade.pipeline.cluster import Cluster, cluster_items
 from lemonade.pipeline.ingest import ingest
 from lemonade.pipeline.rank import rank_clusters
 from lemonade.pipeline.write import WrittenStory, write_edition
@@ -23,6 +25,47 @@ from lemonade.render.profiles import load_profile
 from lemonade.render.typst_runner import render_pdf
 
 logger = logging.getLogger(__name__)
+
+
+async def _enrich_cluster_sources(
+    session: AsyncSession, clusters: list[Cluster]
+) -> None:
+    """Attach authoritative source metadata to each cluster.
+
+    Pulls (Item, Source) by id and builds a per-cluster ``sources`` list
+    of dicts with title, url, domain, type, published_at, channel_name.
+    This gives both the ranker (popularity / source-type breadth signal)
+    and the renderer (real, non-hallucinated "weiterlesen" entries)
+    something to work with.
+    """
+    all_ids = {iid for c in clusters for iid in c.item_ids}
+    if not all_ids:
+        return
+    import uuid as _uuid
+
+    rows = await session.execute(
+        select(Item, Source).join(Source).where(Item.id.in_([_uuid.UUID(i) for i in all_ids]))
+    )
+    meta: dict[str, dict] = {}
+    for item, source in rows.all():
+        domain = urlparse(item.url).netloc.lower().removeprefix("www.")
+        is_youtube = source.type == "youtube_channel"
+        meta[str(item.id)] = {
+            "item_id": str(item.id),
+            "title": item.title or "",
+            "url": item.url,
+            "domain": domain,
+            "type": "youtube" if is_youtube else "rss",
+            "published_at": item.published_at.isoformat() if item.published_at else None,
+            # For YouTube the author is the channel name; for RSS use the
+            # source's display_name or fall back to the domain.
+            "channel_name": (
+                item.author if is_youtube else (source.display_name or domain)
+            ),
+        }
+
+    for c in clusters:
+        c.sources = [meta[i] for i in c.item_ids if i in meta]
 
 
 def _story_dict(s: WrittenStory) -> dict:
@@ -160,11 +203,22 @@ async def run_pipeline(
         # 1. Ingest
         await ingest(config, session)
 
-        # 2. Gather items with embeddings
+        # 2. Gather items with embeddings, excluding anything already
+        # delivered in a prior successful edition. Without this filter
+        # the same story could be published every day until it falls out
+        # of the source feeds.
+        already_published = (
+            select(EditionItem.item_id)
+            .join(Edition, EditionItem.edition_id == Edition.id)
+            .where(Edition.status.in_(("ready", "delivered")))
+        )
         result = await session.execute(
-            select(Item).where(Item.embedding.isnot(None))
+            select(Item)
+            .where(Item.embedding.isnot(None))
+            .where(~Item.id.in_(already_published))
         )
         items = result.scalars().all()
+        logger.info("Pipeline: %d eligible items (after cross-edition dedup)", len(items))
 
         item_dicts = [
             {
@@ -178,11 +232,12 @@ async def run_pipeline(
             for it in items
         ]
 
-        # 3. Cluster
+        # 3. Cluster + enrich with authoritative source metadata
         clusters = cluster_items(item_dicts)
         if not clusters:
             logger.warning("No clusters produced — nothing to publish.")
             return []
+        await _enrich_cluster_sources(session, clusters)
 
         # 4. Rank
         llm = LLMClient(default_model=config.llm.ranker_model)
@@ -218,7 +273,7 @@ async def run_pipeline(
 
             output_dir = Path(config.delivery.filesystem.output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
-            pdf_path = output_dir / f"{device_id}_{date_str}.pdf"
+            pdf_path = output_dir / f"{date_str}_{device_id}.pdf"
 
             edition = Edition(
                 date=edition_date,

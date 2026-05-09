@@ -103,7 +103,9 @@ manuell gebundelt werden (`templates/fonts/`). Niedrige Priorität.
 |---|---|---|
 | Embeddings + pgvector KNN-Cluster (Cosine 0.85) | ✅ | |
 | Repräsentant pro Cluster (längster Text) | ✅ | |
-| Pass 1: Cluster-Ranking (relevance/novelty/depth) | ✅ | |
+| Cross-Edition Dedup ("nicht nochmal publizieren") | ✅ | seit v0.4.0 |
+| Pass 1: Cluster-Ranking (relevance/novelty/depth/breadth) | ✅ | breadth-Signal seit v0.4.0 |
+| Authoritative Sources statt LLM-Hallucination | ✅ | seit v0.4.0 |
 | Pass 2: Schreiben mit strukturierter JSON-Antwort | ✅ | |
 | Robuste JSON-Extraktion (Fences, Array-Wrapping) | ✅ | seit v0.2.0 |
 | Mehrsprachige Prompts (en/de/fr) | ✅ | seit v0.1.1 |

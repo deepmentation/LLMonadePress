@@ -15,6 +15,11 @@ class Cluster:
     urls: list[str] = field(default_factory=list)
     item_ids: list[str] = field(default_factory=list)
     embedding: list[float] | None = None
+    # Filled by orchestrate after clustering — authoritative metadata
+    # for each item in the cluster (title, url, domain, type, published_at,
+    # channel_name). Used both for ranking signal (count, type breadth) and
+    # for rendering the "weiterlesen" sources list without LLM hallucination.
+    sources: list[dict] = field(default_factory=list)
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:

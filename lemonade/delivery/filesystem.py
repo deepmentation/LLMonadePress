@@ -14,5 +14,5 @@ class FilesystemDelivery(DeliveryChannel):
 
     async def deliver(self, pdf_path: Path, edition_date: str, device: str) -> None:
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        dest = self.output_dir / f"{device}_{edition_date}.pdf"
+        dest = self.output_dir / f"{edition_date}_{device}.pdf"
         shutil.copy2(pdf_path, dest)

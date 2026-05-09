@@ -11,7 +11,7 @@ async def test_filesystem_delivery(tmp_path):
     channel = FilesystemDelivery(output_dir)
     await channel.deliver(pdf, "2026-05-08", "remarkable_ppm")
 
-    dest = output_dir / "remarkable_ppm_2026-05-08.pdf"
+    dest = output_dir / "2026-05-08_remarkable_ppm.pdf"
     assert dest.exists()
     assert dest.read_bytes() == b"%PDF-1.4 test content"
 
@@ -24,4 +24,4 @@ async def test_filesystem_creates_directory(tmp_path):
     channel = FilesystemDelivery(output_dir)
     await channel.deliver(pdf, "2026-05-08", "generic_a5")
 
-    assert (output_dir / "generic_a5_2026-05-08.pdf").exists()
+    assert (output_dir / "2026-05-08_generic_a5.pdf").exists()

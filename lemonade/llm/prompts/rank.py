@@ -12,9 +12,12 @@ def build_rank_prompt(clusters: list[dict], max_stories: int, language: str) -> 
 
     cluster_text = ""
     for i, c in enumerate(clusters, start=1):
+        n_sources = c.get("source_count", 1)
+        types = c.get("source_types") or [c.get("source_type", "unknown")]
+        type_summary = "+".join(sorted(set(types)))
         cluster_text += "\n" + p.rank_cluster_header.format(n=i, id=c["id"]) + "\n"
         cluster_text += f"{p.rank_label_title}: {c['title']}\n"
-        cluster_text += f"{p.rank_label_source}: {c.get('source_type', 'unknown')}\n"
+        cluster_text += f"{p.rank_label_source}: {type_summary} ({n_sources}x)\n"
         cluster_text += f"{p.rank_label_text}: {c['text'][:500]}\n"
 
     return (
@@ -22,7 +25,8 @@ def build_rank_prompt(clusters: list[dict], max_stories: int, language: str) -> 
         + "\n"
         + f"- {p.rank_criteria_relevance}\n"
         + f"- {p.rank_criteria_novelty}\n"
-        + f"- {p.rank_criteria_depth}\n\n"
+        + f"- {p.rank_criteria_depth}\n"
+        + f"- {p.rank_criteria_breadth}\n\n"
         + p.rank_select.format(max_stories=max_stories)
         + "\n\n"
         + p.rank_response_hint

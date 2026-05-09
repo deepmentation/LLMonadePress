@@ -17,6 +17,7 @@ class PromptPack:
     rank_criteria_relevance: str
     rank_criteria_novelty: str
     rank_criteria_depth: str
+    rank_criteria_breadth: str
     rank_select: str
     rank_response_hint: str
     rank_cluster_header: str
@@ -49,6 +50,11 @@ PROMPTS: dict[str, PromptPack] = {
         rank_criteria_relevance="relevance (0–10): general importance, independent of any reader",
         rank_criteria_novelty="novelty (0–10): how new the information is",
         rank_criteria_depth="depth (0–10): substantive contribution vs. tabloid noise",
+        rank_criteria_breadth=(
+            "breadth (0–10): how many independent sources cover this — multiple "
+            "outlets reporting the same story is a strong importance signal "
+            "(see source count and type mix per cluster)"
+        ),
         rank_select="Select the top {max_stories}.",
         rank_response_hint=(
             'Respond as JSON: {{"ranked": [{{"cluster_id": "...", "relevance": N, '
@@ -87,6 +93,11 @@ PROMPTS: dict[str, PromptPack] = {
         rank_criteria_relevance="relevance (0–10): generelle Wichtigkeit, unabhängig vom Leser",
         rank_criteria_novelty="novelty (0–10): wie neu die Information ist",
         rank_criteria_depth="depth (0–10): substantieller Beitrag vs. Boulevard",
+        rank_criteria_breadth=(
+            "breadth (0–10): wie viele unabhängige Quellen darüber berichten — "
+            "mehrere Medien zum gleichen Thema sind ein starkes Wichtigkeits-Signal "
+            "(siehe Source-Count und Typ-Mix pro Cluster)"
+        ),
         rank_select="Wähle die Top-{max_stories} aus.",
         rank_response_hint=(
             'Antwort als JSON: {{"ranked": [{{"cluster_id": "...", "relevance": N, '
@@ -125,6 +136,11 @@ PROMPTS: dict[str, PromptPack] = {
         rank_criteria_relevance="relevance (0–10) : importance générale, indépendamment du lecteur",
         rank_criteria_novelty="novelty (0–10) : nouveauté de l'information",
         rank_criteria_depth="depth (0–10) : contribution substantielle vs. presse à sensation",
+        rank_criteria_breadth=(
+            "breadth (0–10) : combien de sources indépendantes couvrent ce sujet — "
+            "plusieurs médias rapportant la même histoire est un fort signal "
+            "d'importance (voir le nombre et la diversité des sources par groupe)"
+        ),
         rank_select="Sélectionnez les {max_stories} meilleurs.",
         rank_response_hint=(
             'Répondez en JSON : {{"ranked": [{{"cluster_id": "...", "relevance": N, '

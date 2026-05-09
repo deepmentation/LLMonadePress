@@ -39,12 +39,16 @@ async def write_story(
         result = result[0] if result else {}
     if not isinstance(result, dict):
         result = {}
+    # Sources come from the cluster authoritatively (real DB rows) rather
+    # than from whatever the LLM chose to fabricate. Falls back to the LLM
+    # output only if the cluster has no enriched metadata yet.
+    sources = cluster.sources or result.get("sources", [])
     story = WrittenStory(
         headline=result.get("headline", ""),
         deck=result.get("deck", ""),
         body=result.get("body", ""),
         category=result.get("category", ""),
-        sources=result.get("sources", []),
+        sources=sources,
         pull_quote=result.get("pull_quote"),
         cluster_id=cluster.id,
     )

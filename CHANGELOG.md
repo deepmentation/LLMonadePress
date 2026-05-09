@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-09
+
+### Cross-edition novelty + authoritative sources
+The pipeline now actually behaves like a daily newspaper instead of
+re-publishing the same stories every day. Sources in the PDF are real
+DB rows, not LLM guesses, and the ranker can see how many independent
+outlets cover a story.
+
+### Added
+- **Cross-edition dedup.** Item selection in `orchestrate.run_pipeline`
+  excludes anything already in a `ready` or `delivered` edition. Without
+  this filter the same article could surface in every edition until it
+  fell out of the source feeds. KONZEPT.md §7.2 had specified this from
+  day one — the implementation has caught up.
+- **Authoritative source metadata on each cluster.** After clustering,
+  orchestrate joins `Item` × `Source` for every item in every cluster
+  and attaches a list of `{title, url, domain, type, published_at,
+  channel_name}` dicts to `Cluster.sources`. No more LLM hallucination
+  in the "weiterlesen" list.
+- **Source-breadth signal in the ranker.** The rank prompt now exposes
+  `source_count` and a `rss+youtube` style type-mix per cluster, plus a
+  fourth scoring criterion (`breadth`). Stories covered by multiple
+  independent outlets get a measurable popularity boost. Translated for
+  EN / DE / FR.
+- **Rich source rendering in `story.typ`.** Sources display as e.g.
+  `▸ Video · ColeMedin · 2026-05-09 · "Opus 4.7 ist ein Freak"` with the
+  title as a clickable link, separated from the body by a thin rule.
+
+### Changed
+- **PDF filenames lead with the date** — `2026-05-09_remarkable_ppm.pdf`
+  instead of `remarkable_ppm_2026-05-09.pdf`. Sorts chronologically in
+  any file browser.
+- `WrittenStory.sources` is now the authoritative list (the LLM-generated
+  one is only used as a fallback when the cluster has no enriched
+  metadata, which only happens in tests).
+
 ## [0.3.2] — 2026-05-09
 
 ### Fixed
@@ -265,7 +301,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...v0.3.0

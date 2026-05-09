@@ -13,7 +13,15 @@ async def rank_clusters(
     language: str = "en",
 ) -> tuple[list[dict], LLMResponse]:
     cluster_dicts = [
-        {"id": c.id, "title": c.title, "text": c.text, "source_type": c.source_type}
+        {
+            "id": c.id,
+            "title": c.title,
+            "text": c.text,
+            "source_type": c.source_type,
+            # Breadth signal — how many distinct sources cover this story.
+            "source_count": len(c.sources) or len(c.item_ids) or 1,
+            "source_types": sorted({s.get("type", c.source_type) for s in c.sources}),
+        }
         for c in clusters
     ]
     prompt = build_rank_prompt(cluster_dicts, max_stories, language=language)
