@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lemonade"
-version = "0.3.1"
+version = "0.3.2"
 description = "AI-powered daily newspaper generator for E-Ink tablets and beyond"
 license = "MIT"
 requires-python = ">=3.12"

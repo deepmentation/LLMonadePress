@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-05-09
+
+### Fixed
+- **Long YouTube videos no longer hit the Whisper 25 MB upload cap.**
+  Audio is now compressed with ffmpeg to mono opus @ 24 kbps right
+  after download — speech-quality stays intact while a 60-minute talk
+  shrinks from ~50 MB to ~10 MB. Verified on a 31-minute German video:
+  29 MB raw → 5.7 MB opus, transcribed in 6 s via OpenRouter.
+- Dockerfile installs `ffmpeg` (Whisper providers all cap upload at
+  25 MB; OpenRouter / OpenAI / Groq alike).
+
 ## [0.3.1] — 2026-05-09
 
 ### Fixed
@@ -254,7 +265,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...v0.2.0

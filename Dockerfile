@@ -8,7 +8,8 @@ WORKDIR /app
 ARG TYPST_VERSION=0.12.0
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl ca-certificates xz-utils \
-        fonts-dejavu-core fonts-dejavu-extra fonts-noto-core && \
+        fonts-dejavu-core fonts-dejavu-extra fonts-noto-core \
+        ffmpeg && \
     ARCH="$(dpkg --print-architecture)" && \
     case "$ARCH" in \
         amd64) TYPST_ARCH="x86_64-unknown-linux-musl" ;; \

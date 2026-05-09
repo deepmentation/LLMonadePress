@@ -206,16 +206,26 @@ class YouTubeAdapter(SourceAdapter):
                 return None
             return {"text": text, "source": source}
 
+    # Whisper providers (OpenAI, OpenRouter, Groq) cap upload at 25 MB.
+    # We compress to mono opus 24 kbps after download, which keeps a
+    # 60-minute talk under ~11 MB without hurting speech ASR quality.
+    AUDIO_BITRATE = "24k"
+    AUDIO_CHANNELS = "1"
+
     async def _download_audio(self, video_id: str, dest_dir: Path) -> Path | None:
-        """yt-dlp the audio-only stream into dest_dir. Returns the file path."""
+        """yt-dlp the audio-only stream then compress with ffmpeg.
+
+        Returns the compressed file path (.opus). Falls back to the raw
+        download if ffmpeg fails — the caller can then decide whether the
+        size is acceptable.
+        """
         url = f"https://youtube.com/watch?v={video_id}"
-        # Run yt-dlp in a thread so it doesn't block the event loop.
         loop = asyncio.get_event_loop()
 
         def _download() -> Path | None:
             import yt_dlp
             opts = {
-                "format": "bestaudio[ext=m4a]/bestaudio",
+                "format": "bestaudio/best",
                 "outtmpl": str(dest_dir / "%(id)s.%(ext)s"),
                 "quiet": True,
                 "no_warnings": True,
@@ -227,7 +237,35 @@ class YouTubeAdapter(SourceAdapter):
             path = dest_dir / f"{video_id}.{ext}"
             return path if path.exists() else None
 
-        return await loop.run_in_executor(None, _download)
+        raw_path = await loop.run_in_executor(None, _download)
+        if raw_path is None:
+            return None
+
+        compressed = dest_dir / f"{video_id}.opus"
+        proc = await asyncio.create_subprocess_exec(
+            "ffmpeg", "-y", "-loglevel", "error",
+            "-i", str(raw_path),
+            "-ac", self.AUDIO_CHANNELS,
+            "-b:a", self.AUDIO_BITRATE,
+            "-c:a", "libopus",
+            "-vn",  # drop any video stream just in case
+            str(compressed),
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await proc.communicate()
+        if proc.returncode != 0 or not compressed.exists():
+            logger.warning(
+                "ffmpeg compression failed for %s (rc=%s): %s — using raw download",
+                video_id, proc.returncode, stderr.decode()[:200],
+            )
+            return raw_path
+        # Drop the raw file to keep the temp dir small.
+        try:
+            raw_path.unlink()
+        except OSError:
+            pass
+        return compressed
 
     async def _transcribe_litellm(self, audio_path: Path) -> str | None:
         """Send the audio file to a transcription endpoint.
