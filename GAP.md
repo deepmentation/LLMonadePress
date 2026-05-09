@@ -92,7 +92,7 @@ manuell gebundelt werden (`templates/fonts/`). Niedrige Priorität.
 | YouTube Discovery | ✅ | via yt-dlp `extract_flat="in_playlist"` (Channel-RSS-Endpoint blockt aus Docker-IPs) |
 | Tier 1: native Captions | ✅ | |
 | Tier 2: auto-generated Captions | ✅ | |
-| Tier 3: Whisper-Fallback | ✅ | konfigurierbar: LiteLLM (z.B. `openrouter/openai/whisper-large-v3-turbo`), faster-whisper (lokal), oder `off` |
+| Tier 3: Whisper-Fallback | ✅ | konfigurierbar: OpenRouter (Direct-REST, base64-JSON), Groq/OpenAI via LiteLLM, faster-whisper (lokal), oder `off`. Verifiziert mit OpenRouter `whisper-large-v3-turbo`. |
 | Handle-Resolution (`@channel-handle` → channel_id) | ✅ | via yt-dlp |
 | `min_duration_s` Filter (Shorts ignorieren) | ✅ | |
 | Whisper-Sprach-Translation | 🔴 | Konzept §7.1 erwähnt; nicht implementiert |

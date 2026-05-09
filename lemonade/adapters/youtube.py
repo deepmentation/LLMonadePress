@@ -230,14 +230,68 @@ class YouTubeAdapter(SourceAdapter):
         return await loop.run_in_executor(None, _download)
 
     async def _transcribe_litellm(self, audio_path: Path) -> str | None:
-        """Send the audio file to a LiteLLM transcription endpoint."""
+        """Send the audio file to a transcription endpoint.
+
+        OpenRouter exposes whisper at /audio/transcriptions but with a
+        custom base64-in-JSON body (not the OpenAI-compatible multipart
+        form), so LiteLLM cannot route it. We detect the openrouter/
+        prefix and call the REST endpoint directly. All other providers
+        (Groq, OpenAI, …) go through LiteLLM normally.
+        """
+        model = self.asr_config.model
+        if model.startswith("openrouter/"):
+            return await self._transcribe_openrouter(audio_path, model.removeprefix("openrouter/"))
+
         import litellm
         with audio_path.open("rb") as f:
-            response = await litellm.atranscription(
-                model=self.asr_config.model,
-                file=f,
+            response = await litellm.atranscription(model=model, file=f)
+        text = getattr(response, "text", None)
+        if text is None and isinstance(response, dict):
+            text = response.get("text")
+        return text
+
+    async def _transcribe_openrouter(self, audio_path: Path, model: str) -> str | None:
+        """Direct REST call against OpenRouter's transcription endpoint.
+
+        Body shape per https://openrouter.ai/openai/whisper-large-v3-turbo/api:
+            {"model": "openai/...", "input_audio": {"data": <base64>, "format": "<ext>"}}
+        """
+        import base64
+        import os
+
+        import httpx
+
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "OPENROUTER_API_KEY env var is not set; cannot reach OpenRouter."
             )
-        return getattr(response, "text", None) or response.get("text") if isinstance(response, dict) else None
+
+        audio_bytes = audio_path.read_bytes()
+        b64 = base64.b64encode(audio_bytes).decode("ascii")
+        # Strip leading dot from suffix; OpenRouter wants e.g. "m4a", "wav", "mp3"
+        fmt = audio_path.suffix.lstrip(".").lower() or "m4a"
+
+        async with httpx.AsyncClient(timeout=300) as client:
+            response = await client.post(
+                "https://openrouter.ai/api/v1/audio/transcriptions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "X-OpenRouter-Title": "Lemonade",
+                },
+                json={
+                    "model": model,
+                    "input_audio": {"data": b64, "format": fmt},
+                },
+            )
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"OpenRouter transcription failed ({response.status_code}): "
+                f"{response.text[:300]}"
+            )
+        result = response.json()
+        return result.get("text")
 
     async def _transcribe_faster_whisper(self, audio_path: Path) -> str | None:
         """Local transcription via faster-whisper."""

@@ -48,10 +48,14 @@ api_keys_env    = true
 #   "litellm"        — beliebiges LiteLLM-Transcription-Modell (Cloud, schnell)
 #   "faster-whisper" — lokal via faster-whisper (CPU oder GPU)
 backend        = "off"
-# Bei backend = "litellm": LiteLLM-Modell-String. Beispiele:
+# Bei backend = "litellm": Provider/Modell-String.
+# Unterstuetzte Whisper-Provider:
 #   "openrouter/openai/whisper-large-v3-turbo"  (OpenRouter, OPENROUTER_API_KEY)
-#   "groq/whisper-large-v3"                     (Groq, GROQ_API_KEY)
-#   "openai/whisper-1"                          (OpenAI, OPENAI_API_KEY)
+#       — eigener Direct-REST-Pfad, da OpenRouter base64-JSON statt
+#         OpenAI-multipart erwartet (von LiteLLM nicht geroutet)
+#   "groq/whisper-large-v3-turbo"               (Groq, GROQ_API_KEY — kostenloser Free-Tier)
+#   "groq/whisper-large-v3"                      (Groq, langsamer aber genauer)
+#   "openai/whisper-1"                           (OpenAI, OPENAI_API_KEY)
 model          = "openrouter/openai/whisper-large-v3-turbo"
 # Bei backend = "faster-whisper": Modellgroesse ("tiny", "base", "small", "medium", "large-v3")
 model_size     = "medium"

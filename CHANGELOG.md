@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-05-09
+
+### Fixed
+- **OpenRouter Whisper transcription works.** LiteLLM cannot route
+  OpenRouter's `/audio/transcriptions` endpoint because OpenRouter
+  expects a base64-in-JSON body (`input_audio: {data, format}`) instead
+  of OpenAI-compatible multipart form-data. Added a direct REST path
+  for `model = "openrouter/..."` that posts the correct body shape.
+  Verified end-to-end on a real YouTube video.
+- `config.example.toml` documents the OpenRouter caveat and the working
+  alternatives (Groq via LiteLLM, OpenAI via LiteLLM, local
+  faster-whisper).
+
 ## [0.3.0] — 2026-05-09
 
 ### YouTube end-to-end working
@@ -241,7 +254,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...v0.2.0
 [0.1.6]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...v0.1.6
