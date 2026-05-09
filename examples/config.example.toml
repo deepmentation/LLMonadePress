@@ -41,10 +41,19 @@ embedding_model = "openai/text-embedding-3-small"
 api_keys_env    = true
 
 # ─── Spracherkennung (ASR) fuer YouTube ohne Untertitel ────────────────────
+# Wird NUR aktiviert, wenn ein Video weder native noch auto-generated Captions hat.
 [asr]
-# Backend: "faster-whisper" (lokal, GPU optional) oder "groq" (Cloud, schnell)
-backend        = "faster-whisper"
-# Modellgroesse: "tiny", "base", "small", "medium", "large-v3"
+# Backend:
+#   "off"            — Tier 3 deaktiviert (Videos ohne Captions werden uebersprungen)
+#   "litellm"        — beliebiges LiteLLM-Transcription-Modell (Cloud, schnell)
+#   "faster-whisper" — lokal via faster-whisper (CPU oder GPU)
+backend        = "off"
+# Bei backend = "litellm": LiteLLM-Modell-String. Beispiele:
+#   "openrouter/openai/whisper-large-v3-turbo"  (OpenRouter, OPENROUTER_API_KEY)
+#   "groq/whisper-large-v3"                     (Groq, GROQ_API_KEY)
+#   "openai/whisper-1"                          (OpenAI, OPENAI_API_KEY)
+model          = "openrouter/openai/whisper-large-v3-turbo"
+# Bei backend = "faster-whisper": Modellgroesse ("tiny", "base", "small", "medium", "large-v3")
 model_size     = "medium"
 # Sprache: "auto" fuer automatische Erkennung, oder ISO-Code z.B. "de", "en"
 language       = "auto"

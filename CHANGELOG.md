@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-09
+
+### YouTube end-to-end working
+After a research pass that probed every candidate path from inside the
+container, the YouTube adapter now ingests real videos with real transcripts
+in real runs. ColeMedin (English) and Arnold-Oberleiter (German) channels
+both deliver 10 videos per run with auto-generated captions.
+
+### Added
+- **GAP.md** — living "Konzept vs. Code" comparison, referenced from
+  CLAUDE.md as the project roadmap.
+- **YouTube discovery via yt-dlp** instead of the channel RSS endpoint,
+  which 404/500s from data-center IPs (Docker, VPSes). Uses
+  `extract_flat="in_playlist"` for a cheap newest-N fetch; relies on the
+  `(source_id, external_id)` unique constraint for dedup instead of
+  timestamp filtering, since the flat path doesn't expose timestamps.
+- **Handle resolution via yt-dlp** — replaces the HTML-scrape path that
+  hit YouTube's anti-bot wall and returned zero `UC…` IDs.
+- **Tier 3 ASR pluggable** via `[asr]` config:
+  - `backend = "off"` (default) — skip Tier 3, drop videos without captions
+  - `backend = "litellm"` + `model = "openrouter/openai/whisper-large-v3-turbo"`
+    — cloud transcription via any LiteLLM-supported provider (OpenRouter,
+    Groq, OpenAI)
+  - `backend = "faster-whisper"` — local CPU/GPU transcription
+- **`min_duration_s` filter** is now honoured (Shorts are skipped).
+
+### Changed
+- Default `[asr] backend` is now `"off"` (was `"faster-whisper"`). Most
+  channels have captions; opt in to ASR explicitly.
+
 ## [0.2.0] — 2026-05-08
 
 ### First end-to-end working release 🎉
@@ -211,7 +241,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...v0.2.0
 [0.1.6]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...v0.1.5

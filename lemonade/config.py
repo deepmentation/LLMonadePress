@@ -34,7 +34,14 @@ class LLMConfig(BaseModel):
 
 
 class ASRConfig(BaseModel):
-    backend: str = "faster-whisper"
+    # backend ∈ {"faster-whisper", "litellm", "off"}
+    #   "faster-whisper": local CPU/GPU via faster-whisper (model_size applies)
+    #   "litellm":        any LiteLLM transcription model (model field used)
+    #                     e.g. "openrouter/openai/whisper-large-v3-turbo"
+    #                     or "openai/whisper-1", "groq/whisper-large-v3"
+    #   "off":            skip Tier 3 — videos without captions are dropped
+    backend: str = "off"
+    model: str = "openrouter/openai/whisper-large-v3-turbo"
     model_size: str = "medium"
     language: str = "auto"
 

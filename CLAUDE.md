@@ -1,5 +1,13 @@
 # CLAUDE.md — Lemonade
 
+## Roadmap & Concept Gap
+
+**[`GAP.md`](GAP.md) is the living roadmap.** It maps every section of
+[`KONZEPT.md`](KONZEPT.md) to current implementation status (✅ / 🟡 / 🔴 / ⏭️)
+and lists active priorities. Update GAP.md whenever a non-trivial feature
+lands or a new gap is discovered — it is the single source of truth for
+"what's done, what's next."
+
 ## Project Overview
 
 Lemonade generates personalized PDF newspapers from RSS feeds and YouTube channels, optimized for E-Ink tablets (reMarkable, Kindle) and general devices. Self-hosted, single-user MVP, Docker Compose deployment.

@@ -122,7 +122,7 @@ async def ingest(config: LemonadeConfig, session: AsyncSession) -> list[Item]:
         )
         all_new_items.extend(items)
 
-    yt_adapter = YouTubeAdapter()
+    yt_adapter = YouTubeAdapter(asr_config=config.asr)
     for src in config.youtube:
         identifier = src.channel_id or src.channel_handle or ""
         items = await _ingest_one(

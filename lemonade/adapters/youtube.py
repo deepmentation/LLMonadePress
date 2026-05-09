@@ -1,72 +1,127 @@
 from __future__ import annotations
 
-import re
-from datetime import datetime, UTC
-
-import feedparser
+import asyncio
+import logging
+import tempfile
+from datetime import UTC, datetime
+from pathlib import Path
 
 from lemonade.adapters.base import FetchedItem, SourceAdapter
 
+logger = logging.getLogger(__name__)
+
 
 class YouTubeAdapter(SourceAdapter):
-    CHANNEL_FEED = "https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+    """Fetches recent videos from a YouTube channel and transcribes them.
 
-    async def fetch(self, identifier: str, config: dict, since: datetime) -> list[FetchedItem]:
-        channel_id = config.get("channel_id") or identifier
-        if channel_id.startswith("@"):
-            channel_id = await self._resolve_handle(channel_id)
+    Discovery uses yt-dlp instead of YouTube's channel RSS endpoint
+    (``feeds/videos.xml``) — that endpoint frequently 404/500s from data-
+    center IPs (Docker, VPSes), while yt-dlp ships with the bypass logic
+    for handle pages and channel /videos tabs.
 
-        feed_url = self.CHANNEL_FEED.format(channel_id=channel_id)
-        feed = feedparser.parse(feed_url)
+    Transcript pipeline (3 tiers):
+      1. Native captions via youtube-transcript-api
+      2. Auto-generated captions via youtube-transcript-api
+      3. ASR (configured via ``[asr]`` in config.toml, "off" by default)
+    """
 
-        items = []
-        for entry in feed.entries:
-            video_id = getattr(entry, "yt_videoid", None) or self._extract_video_id(entry)
+    # Newest N videos per channel per run. We rely on yt-dlp's natural
+    # newest-first ordering plus DB-side dedup on (source_id, external_id)
+    # instead of a timestamp filter — extract_flat (the fast path) does not
+    # return upload timestamps, and the full path costs seconds per video.
+    DISCOVERY_LIMIT = 10
+
+    def __init__(self, asr_config=None):
+        self.asr_config = asr_config
+
+    async def fetch(
+        self, identifier: str, config: dict, since: datetime  # noqa: ARG002 — see DISCOVERY_LIMIT note
+    ) -> list[FetchedItem]:
+        channel_url = self._channel_url(config.get("channel_id") or identifier)
+        videos = await self._list_recent_videos(channel_url)
+
+        min_duration = int(config.get("min_duration_s") or 0)
+
+        items: list[FetchedItem] = []
+        for video in videos:
+            video_id = video.get("id")
             if not video_id:
                 continue
 
-            published = self._parse_date(entry)
-            if published and published < since:
+            duration = video.get("duration_s")
+            if min_duration and duration is not None and duration < min_duration:
+                logger.debug("Skipping %s: duration %ds < %ds", video_id, duration, min_duration)
                 continue
 
-            transcript = await self._get_transcript(video_id, config)
+            transcript = await self._get_transcript(video_id)
             if transcript is None:
                 continue
 
             items.append(FetchedItem(
                 external_id=video_id,
                 url=f"https://youtube.com/watch?v={video_id}",
-                title=entry.get("title"),
-                author=entry.get("author"),
-                published_at=published,
+                title=video.get("title"),
+                author=video.get("uploader"),
+                published_at=None,  # flat-mode discovery has no timestamps
                 raw_text=transcript["text"],
                 metadata={
                     "source_type": "youtube",
                     "transcript_source": transcript["source"],
+                    **({"duration_s": duration} if duration is not None else {}),
                 },
             ))
         return items
 
-    def _extract_video_id(self, entry) -> str | None:
-        link = entry.get("link", "")
-        match = re.search(r"v=([a-zA-Z0-9_-]{11})", link)
-        return match.group(1) if match else None
+    @staticmethod
+    def _channel_url(identifier: str) -> str:
+        if identifier.startswith("@"):
+            return f"https://www.youtube.com/{identifier}/videos"
+        if identifier.startswith("UC") and len(identifier) == 24:
+            return f"https://www.youtube.com/channel/{identifier}/videos"
+        # Last-ditch: hand whatever we got to yt-dlp and hope it figures it out.
+        return f"https://www.youtube.com/{identifier}"
 
-    def _parse_date(self, entry) -> datetime | None:
-        for field in ("published", "updated"):
-            val = entry.get(field)
-            if val:
-                try:
-                    from email.utils import parsedate_to_datetime
-                    return parsedate_to_datetime(val).astimezone(UTC)
-                except Exception:
-                    try:
-                        return datetime.fromisoformat(val.replace("Z", "+00:00"))
-                    except Exception:
-                        pass
-        return None
+    async def _list_recent_videos(self, channel_url: str) -> list[dict]:
+        """Use yt-dlp to list recent videos. Returns dicts with id, title,
+        duration_s, uploader."""
+        loop = asyncio.get_event_loop()
 
-    async def _get_transcript(self, video_id: str, config: dict) -> dict | None:
+        def _extract() -> list[dict]:
+            import yt_dlp
+            opts = {
+                "quiet": True,
+                "no_warnings": True,
+                # "in_playlist" exposes id/title/duration/url for each entry
+                # without resolving each video individually (that would take
+                # seconds per video).
+                "extract_flat": "in_playlist",
+                "skip_download": True,
+                "playlistend": self.DISCOVERY_LIMIT,
+            }
+            try:
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    info = ydl.extract_info(channel_url, download=False)
+            except Exception:
+                logger.exception("yt-dlp discovery failed for %s", channel_url)
+                return []
+
+            entries = info.get("entries") or []
+            uploader = info.get("channel") or info.get("uploader")
+            results: list[dict] = []
+            for e in entries:
+                if not e or e.get("_type") not in (None, "url", "video"):
+                    continue
+                results.append({
+                    "id": e.get("id"),
+                    "title": e.get("title"),
+                    "duration_s": int(e["duration"]) if e.get("duration") else None,
+                    "uploader": uploader,
+                })
+            return results
+
+        return await loop.run_in_executor(None, _extract)
+
+    async def _get_transcript(self, video_id: str) -> dict | None:
         # Tier 1: Native captions
         try:
             from youtube_transcript_api import YouTubeTranscriptApi
@@ -87,9 +142,112 @@ class YouTubeAdapter(SourceAdapter):
         except Exception:
             pass
 
-        # Tier 3: Whisper (deferred — return None for now if no captions)
+        # Tier 3: ASR (only if explicitly enabled)
+        if self.asr_config and self.asr_config.backend != "off":
+            try:
+                return await self._asr_transcribe(video_id)
+            except Exception:
+                logger.exception("ASR transcription failed for %s", video_id)
+
         return None
 
-    async def _resolve_handle(self, handle: str) -> str:
-        """Resolve a @handle to a channel ID. Stub — returns handle as-is for now."""
-        return handle
+    async def _resolve_handle(self, handle: str) -> str | None:
+        """Resolve a @handle to a channel ID via yt-dlp's metadata extractor.
+
+        Scraping the HTML page directly often hits YouTube's consent/anti-bot
+        wall (the page contains zero ``UC…`` IDs). yt-dlp ships with the
+        machinery to bypass that, so reuse it here even though we only want
+        a single ID.
+        """
+        loop = asyncio.get_event_loop()
+
+        def _extract() -> str | None:
+            import yt_dlp
+            opts = {
+                "quiet": True,
+                "no_warnings": True,
+                "extract_flat": True,
+                "skip_download": True,
+                "playlistend": 1,  # we don't need the videos, just the channel info
+            }
+            url = f"https://www.youtube.com/{handle}"
+            try:
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    info = ydl.extract_info(url, download=False)
+            except Exception:
+                logger.exception("yt-dlp failed to resolve handle %s", handle)
+                return None
+            for key in ("channel_id", "uploader_id", "id"):
+                val = info.get(key)
+                if val and isinstance(val, str) and val.startswith("UC") and len(val) == 24:
+                    return val
+            return None
+
+        return await loop.run_in_executor(None, _extract)
+
+    async def _asr_transcribe(self, video_id: str) -> dict | None:
+        """Download the audio and transcribe via the configured ASR backend."""
+        with tempfile.TemporaryDirectory(prefix="lemonade-yt-") as tmp:
+            audio_path = await self._download_audio(video_id, Path(tmp))
+            if audio_path is None:
+                return None
+
+            backend = self.asr_config.backend
+            if backend == "litellm":
+                text = await self._transcribe_litellm(audio_path)
+                source = f"asr_litellm_{self.asr_config.model.split('/')[-1]}"
+            elif backend == "faster-whisper":
+                text = await self._transcribe_faster_whisper(audio_path)
+                source = f"asr_faster-whisper_{self.asr_config.model_size}"
+            else:
+                return None
+
+            if not text:
+                return None
+            return {"text": text, "source": source}
+
+    async def _download_audio(self, video_id: str, dest_dir: Path) -> Path | None:
+        """yt-dlp the audio-only stream into dest_dir. Returns the file path."""
+        url = f"https://youtube.com/watch?v={video_id}"
+        # Run yt-dlp in a thread so it doesn't block the event loop.
+        loop = asyncio.get_event_loop()
+
+        def _download() -> Path | None:
+            import yt_dlp
+            opts = {
+                "format": "bestaudio[ext=m4a]/bestaudio",
+                "outtmpl": str(dest_dir / "%(id)s.%(ext)s"),
+                "quiet": True,
+                "no_warnings": True,
+                "noprogress": True,
+            }
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+            ext = info.get("ext", "m4a")
+            path = dest_dir / f"{video_id}.{ext}"
+            return path if path.exists() else None
+
+        return await loop.run_in_executor(None, _download)
+
+    async def _transcribe_litellm(self, audio_path: Path) -> str | None:
+        """Send the audio file to a LiteLLM transcription endpoint."""
+        import litellm
+        with audio_path.open("rb") as f:
+            response = await litellm.atranscription(
+                model=self.asr_config.model,
+                file=f,
+            )
+        return getattr(response, "text", None) or response.get("text") if isinstance(response, dict) else None
+
+    async def _transcribe_faster_whisper(self, audio_path: Path) -> str | None:
+        """Local transcription via faster-whisper."""
+        loop = asyncio.get_event_loop()
+
+        def _run() -> str:
+            from faster_whisper import WhisperModel
+            model = WhisperModel(self.asr_config.model_size, device="cpu", compute_type="int8")
+            lang = None if self.asr_config.language == "auto" else self.asr_config.language
+            segments, _info = model.transcribe(str(audio_path), language=lang)
+            return " ".join(seg.text for seg in segments).strip()
+
+        return await loop.run_in_executor(None, _run)

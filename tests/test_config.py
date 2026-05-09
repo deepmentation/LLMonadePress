@@ -108,7 +108,7 @@ class TestDefaults:
         assert cfg.user.timezone == "Europe/Berlin"
         assert cfg.user.language == "en"
         assert cfg.llm.writer_model == "anthropic/claude-sonnet-4-6"
-        assert cfg.asr.backend == "faster-whisper"
+        assert cfg.asr.backend == "off"
         assert cfg.delivery.devices == ["generic_a5"]
         assert cfg.delivery.filesystem.enabled is True
         assert cfg.delivery.email.enabled is False
