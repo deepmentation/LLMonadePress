@@ -5,7 +5,7 @@
     font: profile.typography.heading_family,
     size: profile.typography.heading_h1_pt * 1pt,
     weight: "bold",
-  )[Lemonade]
+  )[LLMonadePress]
 
   v(1em)
 

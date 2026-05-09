@@ -7,16 +7,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from lemonade.config import LemonadeConfig
-from lemonade.pipeline.cluster import Cluster
-from lemonade.pipeline.write import WrittenStory
+from llmonadepress.config import LLMonadePressConfig
+from llmonadepress.pipeline.cluster import Cluster
+from llmonadepress.pipeline.write import WrittenStory
 
 
 @pytest.fixture
 def basic_config(tmp_path):
-    from lemonade.config import DeliveryConfig, FilesystemDeliveryConfig
+    from llmonadepress.config import DeliveryConfig, FilesystemDeliveryConfig
 
-    return LemonadeConfig(
+    return LLMonadePressConfig(
         delivery=DeliveryConfig(
             filesystem=FilesystemDeliveryConfig(output_dir=str(tmp_path / "output"))
         )
@@ -52,13 +52,13 @@ def mock_stories():
     ]
 
 
-@patch("lemonade.pipeline.orchestrate.ingest", new_callable=AsyncMock)
-@patch("lemonade.pipeline.orchestrate.cluster_items")
-@patch("lemonade.pipeline.orchestrate.rank_clusters", new_callable=AsyncMock)
-@patch("lemonade.pipeline.orchestrate.write_edition", new_callable=AsyncMock)
-@patch("lemonade.pipeline.orchestrate.render_pdf")
-@patch("lemonade.pipeline.orchestrate.load_profile")
-@patch("lemonade.pipeline.orchestrate.get_session_factory")
+@patch("llmonadepress.pipeline.orchestrate.ingest", new_callable=AsyncMock)
+@patch("llmonadepress.pipeline.orchestrate.cluster_items")
+@patch("llmonadepress.pipeline.orchestrate.rank_clusters", new_callable=AsyncMock)
+@patch("llmonadepress.pipeline.orchestrate.write_edition", new_callable=AsyncMock)
+@patch("llmonadepress.pipeline.orchestrate.render_pdf")
+@patch("llmonadepress.pipeline.orchestrate.load_profile")
+@patch("llmonadepress.pipeline.orchestrate.get_session_factory")
 def test_run_pipeline_mocked(
     mock_session_factory,
     mock_load_profile,
@@ -74,8 +74,8 @@ def test_run_pipeline_mocked(
     """Test the pipeline with all stages mocked out."""
     import asyncio
 
-    from lemonade.llm.client import LLMResponse
-    from lemonade.pipeline.orchestrate import run_pipeline
+    from llmonadepress.llm.client import LLMResponse
+    from llmonadepress.pipeline.orchestrate import run_pipeline
 
     # Setup mocks
     mock_ingest.return_value = []

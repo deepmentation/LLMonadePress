@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
-from lemonade.adapters.rss import RSSAdapter
+from llmonadepress.adapters.rss import RSSAdapter
 
 SAMPLE_RSS = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -35,7 +35,7 @@ def parsed_feed():
 
 @pytest.mark.asyncio
 async def test_fetch_parses_items(adapter, parsed_feed):
-    with patch("lemonade.adapters.rss.feedparser.parse", return_value=parsed_feed):
+    with patch("llmonadepress.adapters.rss.feedparser.parse", return_value=parsed_feed):
         items = await adapter.fetch("https://example.com/feed.xml", {}, datetime(2024, 6, 1, tzinfo=timezone.utc))
         assert len(items) == 1
         assert items[0].title == "Test Article"
@@ -43,12 +43,12 @@ async def test_fetch_parses_items(adapter, parsed_feed):
 
 @pytest.mark.asyncio
 async def test_fetch_filters_old_items(adapter, parsed_feed):
-    with patch("lemonade.adapters.rss.feedparser.parse", return_value=parsed_feed):
+    with patch("llmonadepress.adapters.rss.feedparser.parse", return_value=parsed_feed):
         items = await adapter.fetch("https://example.com/feed.xml", {}, datetime(2026, 5, 9, tzinfo=timezone.utc))
         assert len(items) == 0
 
 @pytest.mark.asyncio
 async def test_fetch_extracts_text(adapter, parsed_feed):
-    with patch("lemonade.adapters.rss.feedparser.parse", return_value=parsed_feed):
+    with patch("llmonadepress.adapters.rss.feedparser.parse", return_value=parsed_feed):
         items = await adapter.fetch("https://example.com/feed.xml", {}, datetime(2024, 1, 1, tzinfo=timezone.utc))
         assert "article summary text" in items[0].raw_text

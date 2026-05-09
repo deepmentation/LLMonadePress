@@ -1,13 +1,13 @@
 import pytest
 
-from lemonade.llm.prompts.i18n import (
+from llmonadepress.llm.prompts.i18n import (
     DEFAULT_LANGUAGE,
     PROMPTS,
     SUPPORTED_LANGUAGES,
     get_prompts,
 )
-from lemonade.llm.prompts.rank import build_rank_prompt, build_rank_system
-from lemonade.llm.prompts.write import build_write_prompt, build_write_system
+from llmonadepress.llm.prompts.rank import build_rank_prompt, build_rank_system
+from llmonadepress.llm.prompts.write import build_write_prompt, build_write_system
 
 
 def test_supported_languages_include_en_de_fr():
@@ -90,20 +90,20 @@ def test_rank_prompt_fr_uses_french_labels():
 def test_config_rejects_unsupported_language():
     from pydantic import ValidationError
 
-    from lemonade.config import UserConfig
+    from llmonadepress.config import UserConfig
 
     with pytest.raises(ValidationError):
         UserConfig(language="zz")
 
 
 def test_config_normalises_language_case():
-    from lemonade.config import UserConfig
+    from llmonadepress.config import UserConfig
 
     assert UserConfig(language="DE").language == "de"
 
 
 def test_pyproject_declares_supported_languages():
-    """The [tool.lemonade] section in pyproject.toml is the declarative source of
+    """The [tool.llmonadepress] section in pyproject.toml is the declarative source of
     truth for supported languages — keep it in sync with the i18n registry."""
     import tomllib
     from pathlib import Path
@@ -112,6 +112,6 @@ def test_pyproject_declares_supported_languages():
     with open(pyproject, "rb") as f:
         data = tomllib.load(f)
 
-    declared = data["tool"]["lemonade"]["supported_languages"]
+    declared = data["tool"]["llmonadepress"]["supported_languages"]
     assert set(declared) == set(SUPPORTED_LANGUAGES)
-    assert data["tool"]["lemonade"]["default_language"] == DEFAULT_LANGUAGE
+    assert data["tool"]["llmonadepress"]["default_language"] == DEFAULT_LANGUAGE

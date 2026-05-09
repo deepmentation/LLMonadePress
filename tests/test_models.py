@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from lemonade.models import Delivery, Edition, EditionItem, Item, Source
+from llmonadepress.models import Delivery, Edition, EditionItem, Item, Source
 
 
 def test_source_creation():

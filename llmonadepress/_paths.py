@@ -2,7 +2,7 @@
 
 Works in three modes:
 1. Editable install / repo checkout: data lives at the repo root next to ``lemonade/``.
-2. Wheel install: data is force-included into ``lemonade/_bundled/`` at build time.
+2. Wheel install: data is force-included into ``llmonadepress/_bundled/`` at build time.
 3. Override: the env var ``LEMONADE_PROFILES_DIR`` / ``LEMONADE_TEMPLATES_DIR``
    takes precedence so users can ship their own profiles or templates.
 """

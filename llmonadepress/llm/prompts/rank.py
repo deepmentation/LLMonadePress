@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from lemonade.llm.prompts.i18n import get_prompts
+from llmonadepress.llm.prompts.i18n import get_prompts
 
 
 def build_rank_system(language: str) -> str:

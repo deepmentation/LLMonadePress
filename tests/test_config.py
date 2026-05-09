@@ -3,8 +3,8 @@ from __future__ import annotations
 import pytest
 from pathlib import Path
 
-from lemonade.config import (
-    LemonadeConfig,
+from llmonadepress.config import (
+    LLMonadePressConfig,
     RSSSource,
     YouTubeSource,
     SMTPSettings,

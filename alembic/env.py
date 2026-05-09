@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 
-from lemonade.db import get_database_url
-from lemonade.models import Base
+from llmonadepress.db import get_database_url
+from llmonadepress.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

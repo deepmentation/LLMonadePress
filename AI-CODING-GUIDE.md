@@ -1,6 +1,6 @@
-# AI Coding Guide — Lemonade
+# AI Coding Guide — LLMonadePress
 
-This document helps AI coding assistants understand and contribute to Lemonade effectively.
+This document helps AI coding assistants understand and contribute to LLMonadePress effectively.
 
 ## Architecture Rules
 

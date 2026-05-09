@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from lemonade.adapters.youtube import YouTubeAdapter
+from llmonadepress.adapters.youtube import YouTubeAdapter
 
 
 SINCE = datetime(2024, 1, 1, tzinfo=timezone.utc)

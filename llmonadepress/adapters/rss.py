@@ -7,7 +7,7 @@ import feedparser
 import httpx
 from trafilatura import extract
 
-from lemonade.adapters.base import FetchedItem, SourceAdapter
+from llmonadepress.adapters.base import FetchedItem, SourceAdapter
 
 
 class RSSAdapter(SourceAdapter):

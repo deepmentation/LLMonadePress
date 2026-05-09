@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import AsyncMock, patch, MagicMock
-from lemonade.delivery.email import EmailDelivery
+from llmonadepress.delivery.email import EmailDelivery
 
 @pytest.fixture
 def email_channel():
@@ -11,7 +11,7 @@ def email_channel():
         user="user",
         password="pass",
         from_addr="lemonade@example.com",
-        from_name="Lemonade Daily",
+        from_name="LLMonadePress Daily",
         to=["reader@example.com"],
     )
 
@@ -24,7 +24,7 @@ async def test_email_delivery(email_channel, tmp_path):
     mock_smtp.__aenter__ = AsyncMock(return_value=mock_smtp)
     mock_smtp.__aexit__ = AsyncMock(return_value=False)
 
-    with patch("lemonade.delivery.email.aiosmtplib.SMTP", return_value=mock_smtp):
+    with patch("llmonadepress.delivery.email.aiosmtplib.SMTP", return_value=mock_smtp):
         await email_channel.deliver(pdf, "2026-05-08", "kindle_paperwhite")
         mock_smtp.login.assert_called_once_with("user", "pass")
         mock_smtp.send_message.assert_called_once()

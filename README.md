@@ -1,6 +1,6 @@
-# 🍋 Lemonade
+# 🍋 LLMonadePress
 
-> **When life gives you 800 RSS items and 30 hours of YouTube, Lemonade makes you an 8-page newspaper.**
+> **When life gives you 800 RSS items and 30 hours of YouTube, LLMonadePress makes you an 8-page newspaper.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/downloads/)
@@ -8,9 +8,9 @@
 
 ---
 
-## What is Lemonade?
+## What is LLMonadePress?
 
-Lemonade is a self-hosted, AI-powered daily newspaper generator. It pulls content from your RSS feeds and YouTube channels, clusters and ranks stories with an LLM, and renders device-optimized PDFs for E-Ink tablets like the reMarkable or Kindle Paperwhite. It is LLM-provider-neutral via LiteLLM — use Anthropic, OpenAI, Ollama, Groq, OpenRouter, or any other supported provider.
+LLMonadePress is a self-hosted, AI-powered daily newspaper generator. It pulls content from your RSS feeds and YouTube channels, clusters and ranks stories with an LLM, and renders device-optimized PDFs for E-Ink tablets like the reMarkable or Kindle Paperwhite. It is LLM-provider-neutral via LiteLLM — use Anthropic, OpenAI, Ollama, Groq, OpenRouter, or any other supported provider.
 
 ## Features
 
@@ -86,7 +86,7 @@ docker compose run --rm app run
 ```
 
 > **Cron / scheduling:** call `docker compose run --rm app run` from a host
-> cron job (or systemd timer) at your desired time. Lemonade itself is
+> cron job (or systemd timer) at your desired time. LLMonadePress itself is
 > stateless between runs — all state lives in Postgres.
 
 ## Configuration

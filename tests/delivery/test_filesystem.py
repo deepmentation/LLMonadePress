@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from lemonade.delivery.filesystem import FilesystemDelivery
+from llmonadepress.delivery.filesystem import FilesystemDelivery
 
 @pytest.mark.asyncio
 async def test_filesystem_delivery(tmp_path):

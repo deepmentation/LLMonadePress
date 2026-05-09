@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from lemonade.llm.client import LLMClient, LLMResponse
-from lemonade.llm.prompts.rank import build_rank_prompt, build_rank_system
-from lemonade.pipeline.cluster import Cluster
+from llmonadepress.llm.client import LLMClient, LLMResponse
+from llmonadepress.llm.prompts.rank import build_rank_prompt, build_rank_system
+from llmonadepress.pipeline.cluster import Cluster
 
 
 async def rank_clusters(

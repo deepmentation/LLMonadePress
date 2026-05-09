@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from pathlib import Path
-from lemonade.delivery.remarkable import RemarkableDelivery
+from llmonadepress.delivery.remarkable import RemarkableDelivery
 
 @pytest.mark.asyncio
 async def test_remarkable_delivery(tmp_path):
@@ -10,7 +10,7 @@ async def test_remarkable_delivery(tmp_path):
 
     channel = RemarkableDelivery(folder="Newspaper")
     with patch.object(channel, "_rmapi", new_callable=AsyncMock) as mock_rmapi, \
-         patch("lemonade.delivery.remarkable.shutil.which", return_value="/usr/bin/rmapi"):
+         patch("llmonadepress.delivery.remarkable.shutil.which", return_value="/usr/bin/rmapi"):
         await channel.deliver(pdf, "2026-05-08", "remarkable_ppm")
         assert mock_rmapi.call_count == 3
         mock_rmapi.assert_any_call("mkdir", "-p", "/Newspaper/2026-05/")
@@ -21,7 +21,7 @@ async def test_remarkable_missing_binary(tmp_path):
     pdf = tmp_path / "test.pdf"
     pdf.write_bytes(b"%PDF-1.4")
     channel = RemarkableDelivery()
-    with patch("lemonade.delivery.remarkable.shutil.which", return_value=None):
+    with patch("llmonadepress.delivery.remarkable.shutil.which", return_value=None):
         with pytest.raises(RuntimeError, match="rmapi binary not found"):
             await channel.deliver(pdf, "2026-05-08", "remarkable_ppm")
 
@@ -31,6 +31,6 @@ async def test_remarkable_rmapi_failure():
     mock_proc = AsyncMock()
     mock_proc.returncode = 1
     mock_proc.communicate = AsyncMock(return_value=(b"", b"error"))
-    with patch("lemonade.delivery.remarkable.asyncio.create_subprocess_exec", return_value=mock_proc):
+    with patch("llmonadepress.delivery.remarkable.asyncio.create_subprocess_exec", return_value=mock_proc):
         with pytest.raises(RuntimeError, match="rmapi failed"):
             await channel._rmapi("put", "test.pdf", "/folder/")

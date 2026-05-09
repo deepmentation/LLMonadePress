@@ -6,7 +6,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from lemonade.models import Base
+from llmonadepress.models import Base
 
 _engine = None
 _async_session = None

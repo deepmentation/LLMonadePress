@@ -1,1 +1,1 @@
-# Shared test fixtures for Lemonade test suite.
+# Shared test fixtures for LLMonadePress test suite.

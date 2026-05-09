@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve Lemonade
+about: Report a bug to help us improve LLMonadePress
 title: "[Bug] "
 labels: bug
 assignees: ''
@@ -28,7 +28,7 @@ What actually happened. Include error messages or logs if available.
 
 - **OS:** e.g. Ubuntu 24.04 / macOS 15
 - **Python version:** e.g. 3.12.4
-- **Lemonade version:** e.g. 0.1.0
+- **LLMonadePress version:** e.g. 0.1.0
 - **Docker:** yes/no (version if applicable)
 - **LLM provider:** e.g. Anthropic / Ollama
 - **Target device:** e.g. reMarkable Paper Pro Move

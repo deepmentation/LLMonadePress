@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
-from lemonade.pipeline.rank import rank_clusters
-from lemonade.pipeline.cluster import Cluster
-from lemonade.llm.client import LLMClient, LLMResponse
+from llmonadepress.pipeline.rank import rank_clusters
+from llmonadepress.pipeline.cluster import Cluster
+from llmonadepress.llm.client import LLMClient, LLMResponse
 
 @pytest.mark.asyncio
 async def test_rank_clusters():
@@ -20,9 +20,9 @@ async def test_rank_clusters():
 
 import pytest as _pytest
 from unittest.mock import AsyncMock as _AsyncMock, patch as _patch
-from lemonade.llm.client import LLMResponse as _LLMResp
-from lemonade.pipeline.rank import rank_clusters as _rank
-from lemonade.pipeline.cluster import Cluster as _Cluster
+from llmonadepress.llm.client import LLMResponse as _LLMResp
+from llmonadepress.pipeline.rank import rank_clusters as _rank
+from llmonadepress.pipeline.cluster import Cluster as _Cluster
 
 
 @_pytest.mark.asyncio
@@ -44,7 +44,7 @@ async def test_rank_passes_source_count_and_types_to_prompt():
         captured["prompt"] = prompt
         return ({"ranked": []}, _LLMResp(content="", model="t"))
 
-    from lemonade.llm.client import LLMClient
+    from llmonadepress.llm.client import LLMClient
     client = LLMClient()
     with _patch.object(client, "complete_json", side_effect=fake_complete_json):
         await _rank(clusters, max_stories=5, client=client)

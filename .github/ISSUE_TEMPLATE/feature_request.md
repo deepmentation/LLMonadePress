@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for Lemonade
+about: Suggest an idea for LLMonadePress
 title: "[Feature] "
 labels: enhancement
 assignees: ''

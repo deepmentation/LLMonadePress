@@ -10,19 +10,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from urllib.parse import urlparse
 
-from lemonade.config import LemonadeConfig, SMTPSettings
-from lemonade.db import get_session_factory
-from lemonade.delivery.email import EmailDelivery
-from lemonade.delivery.filesystem import FilesystemDelivery
-from lemonade.delivery.remarkable import RemarkableDelivery
-from lemonade.llm.client import LLMClient
-from lemonade.models import Delivery, Edition, EditionItem, Item, Source
-from lemonade.pipeline.cluster import Cluster, cluster_items
-from lemonade.pipeline.ingest import ingest
-from lemonade.pipeline.rank import rank_clusters
-from lemonade.pipeline.write import WrittenStory, write_edition
-from lemonade.render.profiles import load_profile
-from lemonade.render.typst_runner import render_pdf
+from llmonadepress.config import LLMonadePressConfig, SMTPSettings
+from llmonadepress.db import get_session_factory
+from llmonadepress.delivery.email import EmailDelivery
+from llmonadepress.delivery.filesystem import FilesystemDelivery
+from llmonadepress.delivery.remarkable import RemarkableDelivery
+from llmonadepress.llm.client import LLMClient
+from llmonadepress.models import Delivery, Edition, EditionItem, Item, Source
+from llmonadepress.pipeline.cluster import Cluster, cluster_items
+from llmonadepress.pipeline.ingest import ingest
+from llmonadepress.pipeline.rank import rank_clusters
+from llmonadepress.pipeline.write import WrittenStory, write_edition
+from llmonadepress.render.profiles import load_profile
+from llmonadepress.render.typst_runner import render_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ def _build_edition_json(
 
 
 async def _deliver(
-    config: LemonadeConfig,
+    config: LLMonadePressConfig,
     pdf_path: Path,
     edition_date: str,
     device: str,
@@ -186,7 +186,7 @@ async def _deliver(
 
 
 async def run_pipeline(
-    config: LemonadeConfig,
+    config: LLMonadePressConfig,
     edition_date: date | None = None,
     devices: list[str] | None = None,
     deliver: bool = True,

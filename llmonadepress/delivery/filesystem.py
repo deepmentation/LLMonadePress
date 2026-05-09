@@ -3,7 +3,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from lemonade.delivery.base import DeliveryChannel
+from llmonadepress.delivery.base import DeliveryChannel
 
 
 class FilesystemDelivery(DeliveryChannel):

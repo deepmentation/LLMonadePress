@@ -61,7 +61,7 @@ komplett · ⏭️ bewusst aufgeschoben (siehe KONZEPT §11 Roadmap).
 | `[delivery]` + Subsektionen | ✅ | |
 | `[[rss]]` | ✅ | |
 | `[[youtube]]` | ✅ | (Handle-Resolution war Stub bis v0.2.x) |
-| `[tool.lemonade]` in `pyproject.toml` | ✅ | Single source of truth für unterstützte Sprachen |
+| `[tool.llmonadepress]` in `pyproject.toml` | ✅ | Single source of truth für unterstützte Sprachen |
 
 ## §6 Device-Profile
 

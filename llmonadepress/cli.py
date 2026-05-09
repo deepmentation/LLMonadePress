@@ -6,7 +6,7 @@ from pathlib import Path
 
 import typer
 
-app = typer.Typer(help="Lemonade — your personal AI newspaper.")
+app = typer.Typer(help="LLMonadePress — your personal AI newspaper.")
 sources_app = typer.Typer(help="Manage configured sources.")
 devices_app = typer.Typer(help="Manage device profiles.")
 app.add_typer(sources_app, name="sources")
@@ -14,7 +14,7 @@ app.add_typer(devices_app, name="devices")
 
 
 def _load_config(config_path: Path):
-    from lemonade.config import load_config
+    from llmonadepress.config import load_config
 
     return load_config(config_path)
 
@@ -27,7 +27,7 @@ def run(
     date_str: str = typer.Option(None, "--date", help="Edition date (YYYY-MM-DD), defaults to today"),
 ):
     """Run the full pipeline: ingest, cluster, rank, write, render, deliver."""
-    from lemonade.pipeline.orchestrate import run_pipeline
+    from llmonadepress.pipeline.orchestrate import run_pipeline
 
     cfg = _load_config(config)
     edition_date = date.fromisoformat(date_str) if date_str else None
@@ -44,7 +44,7 @@ def preview(
     date_str: str = typer.Option(None, "--date", help="Edition date (YYYY-MM-DD)"),
 ):
     """Render only (no delivery) and output the PDF path."""
-    from lemonade.pipeline.orchestrate import run_pipeline
+    from llmonadepress.pipeline.orchestrate import run_pipeline
 
     cfg = _load_config(config)
     edition_date = date.fromisoformat(date_str) if date_str else None
@@ -60,7 +60,7 @@ def preview(
 @app.command()
 def init():
     """Initialize the database schema."""
-    from lemonade.db import init_db
+    from llmonadepress.db import init_db
 
     asyncio.run(init_db())
     typer.echo("Database initialized.")
@@ -86,7 +86,7 @@ def sources_list(
 @devices_app.command("list")
 def devices_list():
     """List available device profiles."""
-    from lemonade.render.profiles import list_profiles
+    from llmonadepress.render.profiles import list_profiles
 
     profiles = list_profiles()
     for p in profiles:
@@ -103,7 +103,7 @@ def email_test(
     import aiosmtplib
     from email.message import EmailMessage
 
-    from lemonade.config import SMTPSettings
+    from llmonadepress.config import SMTPSettings
 
     cfg = _load_config(config)
     smtp = SMTPSettings()
@@ -115,8 +115,8 @@ def email_test(
     msg = EmailMessage()
     msg["From"] = f"{cfg.delivery.email.from_name} <{smtp.from_addr}>"
     msg["To"] = ", ".join(cfg.delivery.email.to) if cfg.delivery.email.to else smtp.from_addr
-    msg["Subject"] = "Lemonade — Test Email"
-    msg.set_content("This is a test email from Lemonade. If you see this, SMTP is working.")
+    msg["Subject"] = "LLMonadePress — Test Email"
+    msg.set_content("This is a test email from LLMonadePress. If you see this, SMTP is working.")
 
     async def _send():
         async with aiosmtplib.SMTP(

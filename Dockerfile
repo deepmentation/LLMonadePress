@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy project sources before install so hatchling can find the package
 COPY pyproject.toml README.md ./
-COPY lemonade/ ./lemonade/
+COPY llmonadepress/ ./llmonadepress/
 COPY device_profiles/ ./device_profiles/
 COPY templates/ ./templates/
 COPY alembic/ ./alembic/

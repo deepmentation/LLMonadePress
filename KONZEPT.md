@@ -1,6 +1,6 @@
-# Lemonade — Technisches Konzept (MVP)
+# LLMonadePress — Technisches Konzept (MVP)
 
-> **When life gives you 800 RSS items and 30 hours of YouTube, Lemonade makes you an 8-page newspaper.**
+> **When life gives you 800 RSS items and 30 hours of YouTube, LLMonadePress makes you an 8-page newspaper.**
 >
 > Ein selbst-gehosteter, AI-gestützter Daily-Newspaper-Generator für E-Ink-Tablets und Tablets allgemein. Open-Source, deviceneutral, LLM-providerneutral.
 
@@ -13,7 +13,7 @@
 
 ## 1. Vision & Scope
 
-Lemonade generiert ein- bis zweimal täglich eine personalisierte PDF-„Zeitung" aus den vom User definierten YouTube-Kanälen und RSS-Feeds. Die PDF wird gerätespezifisch gerendert (Seitengröße, Typografie, Margins, Farbprofil) und an das Endgerät zugestellt — initial reMarkable, generisch-PDF und E-Mail.
+LLMonadePress generiert ein- bis zweimal täglich eine personalisierte PDF-„Zeitung" aus den vom User definierten YouTube-Kanälen und RSS-Feeds. Die PDF wird gerätespezifisch gerendert (Seitengröße, Typografie, Margins, Farbprofil) und an das Endgerät zugestellt — initial reMarkable, generisch-PDF und E-Mail.
 
 ### Was im MVP drin ist
 
@@ -182,8 +182,8 @@ output_dir     = "/app/output"          # User syncs selbst (Syncthing, USB)
 enabled        = true
 device_profile = "kindle_paperwhite"    # welches Profile per Mail schicken
 to             = ["meine-mail@example.com", "meinkindle@kindle.com"]
-from_name      = "Lemonade Daily"
-subject_template = "Lemonade — {date:%A, %d. %B %Y}"
+from_name      = "LLMonadePress Daily"
+subject_template = "LLMonadePress — {date:%A, %d. %B %Y}"
 # SMTP-Settings aus ENV: LEMONADE_SMTP_HOST, _PORT, _USER, _PASS, _FROM
 attach_pdf     = true
 include_summary_in_body = true          # Plaintext-Headlines im Mail-Body
@@ -518,7 +518,7 @@ class EmailDelivery(DeliveryChannel):
         msg["Subject"] = self.smtp.subject_template.format(date=edition.date)
 
         body = self._render_body(edition) if self.smtp.include_summary else ""
-        msg.set_content(body or "Deine Lemonade-Ausgabe von heute liegt im Anhang.")
+        msg.set_content(body or "Deine LLMonadePress-Ausgabe von heute liegt im Anhang.")
 
         with pdf_path.open("rb") as f:
             msg.add_attachment(
@@ -540,7 +540,7 @@ class EmailDelivery(DeliveryChannel):
     def _render_body(self, edition: Edition) -> str:
         """Plaintext-Headlines fürs Mail-Preview."""
         payload = edition.json_payload
-        lines = [f"Lemonade — {edition.date:%A, %d. %B %Y}", ""]
+        lines = [f"LLMonadePress — {edition.date:%A, %d. %B %Y}", ""]
         lines.append(f"▸ {payload['lead_story']['headline']}")
         for section in payload['sections']:
             lines.append(f"\n{section['name'].upper()}")
@@ -767,7 +767,7 @@ lemonade email-test                   # SMTP-Verbindung prüfen, Test-Mail
 
 Hier wird die NotebookLM-Frage relevant. Zwei Wege, schließen sich nicht aus:
 
-- **(a) Open Notebook integrieren.** [Open Notebook](https://github.com/lfnovo/open-notebook) ist ein OSS-NotebookLM-Klon mit Source-Library. Lemonades Item-Korpus als Open-Notebook-Sources spiegeln; User bekommt zusätzlich zur PDF ein Web-UI für Q&A.
+- **(a) Open Notebook integrieren.** [Open Notebook](https://github.com/lfnovo/open-notebook) ist ein OSS-NotebookLM-Klon mit Source-Library. LLMonadePresss Item-Korpus als Open-Notebook-Sources spiegeln; User bekommt zusätzlich zur PDF ein Web-UI für Q&A.
 - **(b) Eigene Long-Term-Memory in pgvector.** Der RAG-Layer (LangChain oder llama-index) erlaubt Fragen wie „Was hat Karpathy diese Woche zu RL gesagt?" — und beim Ranking kann das LLM auf Historie zugreifen („dieses Thema hatten wir vorgestern bereits prominent").
 
 Vorschlag: **(b) als interne Capability der Pipeline (Cross-Edition-Awareness), (a) als optionales Companion-Tool für Power-User.** Beides nicht für MVP.
@@ -819,4 +819,4 @@ Mit Claude Code in dieser Reihenfolge bauen:
 
 ---
 
-*Lemonade — When life gives you 800 RSS items, make Lemonade.*
+*LLMonadePress — When life gives you 800 RSS items, make LLMonadePress.*

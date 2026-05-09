@@ -7,8 +7,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from lemonade._paths import templates_dir
-from lemonade.render.profiles import DeviceProfile
+from llmonadepress._paths import templates_dir
+from llmonadepress.render.profiles import DeviceProfile
 
 
 def render_pdf(

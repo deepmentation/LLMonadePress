@@ -6,7 +6,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-from lemonade.adapters.base import FetchedItem, SourceAdapter
+from llmonadepress.adapters.base import FetchedItem, SourceAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -316,7 +316,7 @@ class YouTubeAdapter(SourceAdapter):
                 headers={
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
-                    "X-OpenRouter-Title": "Lemonade",
+                    "X-OpenRouter-Title": "LLMonadePress",
                 },
                 json={
                     "model": model,

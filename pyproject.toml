@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "lemonade"
-version = "0.4.0"
-description = "AI-powered daily newspaper generator for E-Ink tablets and beyond"
+name = "llmonadepress"
+version = "0.5.0"
+description = "LLMonadePress — AI-powered daily newspaper generator for E-Ink tablets and beyond"
 license = "MIT"
 requires-python = ">=3.12"
-authors = [{name = "Lemonade Contributors"}]
+authors = [{name = "LLMonadePress Contributors"}]
 dependencies = [
     "typer[all]>=0.12",
     "sqlalchemy[asyncio]>=2.0",
@@ -37,7 +37,7 @@ Repository = "https://github.com/lemonade-newspaper/lemonade"
 Issues = "https://github.com/lemonade-newspaper/lemonade/issues"
 
 [project.scripts]
-lemonade = "lemonade.cli:app"
+lemonade = "llmonadepress.cli:app"
 
 [project.optional-dependencies]
 dev = [
@@ -52,20 +52,20 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["lemonade"]
+packages = ["llmonadepress"]
 
 # Bundle device profiles and Typst templates into the wheel under
-# lemonade/_bundled/ so the package is self-contained when pip-installed.
+# llmonadepress/_bundled/ so the package is self-contained when pip-installed.
 # In editable mode the loader falls back to the repo-root copies.
 [tool.hatch.build.targets.wheel.force-include]
-"device_profiles" = "lemonade/_bundled/device_profiles"
-"templates" = "lemonade/_bundled/templates"
+"device_profiles" = "llmonadepress/_bundled/device_profiles"
+"templates" = "llmonadepress/_bundled/templates"
 
-# Lemonade project-level metadata. The list of output languages here is the
+# LLMonadePress project-level metadata. The list of output languages here is the
 # single source of truth — adding a language requires:
 #   1. Adding a translation pack to lemonade/llm/prompts/i18n.py
 #   2. Adding the code to ``supported_languages`` below
-[tool.lemonade]
+[tool.llmonadepress]
 default_language = "en"
 supported_languages = ["en", "de", "fr"]
 

@@ -1,4 +1,4 @@
-# CLAUDE.md — Lemonade
+# CLAUDE.md — LLMonadePress
 
 ## Roadmap & Concept Gap
 
@@ -10,7 +10,7 @@ lands or a new gap is discovered — it is the single source of truth for
 
 ## Project Overview
 
-Lemonade generates personalized PDF newspapers from RSS feeds and YouTube channels, optimized for E-Ink tablets (reMarkable, Kindle) and general devices. Self-hosted, single-user MVP, Docker Compose deployment.
+LLMonadePress generates personalized PDF newspapers from RSS feeds and YouTube channels, optimized for E-Ink tablets (reMarkable, Kindle) and general devices. Self-hosted, single-user MVP, Docker Compose deployment.
 
 ## Tech Stack
 

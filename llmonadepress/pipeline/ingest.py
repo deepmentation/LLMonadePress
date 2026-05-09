@@ -6,12 +6,12 @@ from datetime import datetime, timedelta, UTC
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from lemonade.adapters.base import FetchedItem
-from lemonade.adapters.rss import RSSAdapter
-from lemonade.adapters.youtube import YouTubeAdapter
-from lemonade.config import LemonadeConfig
-from lemonade.llm.client import get_embeddings
-from lemonade.models import Item, Source
+from llmonadepress.adapters.base import FetchedItem
+from llmonadepress.adapters.rss import RSSAdapter
+from llmonadepress.adapters.youtube import YouTubeAdapter
+from llmonadepress.config import LLMonadePressConfig
+from llmonadepress.llm.client import get_embeddings
+from llmonadepress.models import Item, Source
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +101,7 @@ async def _ingest_one(
         return []
 
 
-async def ingest(config: LemonadeConfig, session: AsyncSession) -> list[Item]:
+async def ingest(config: LLMonadePressConfig, session: AsyncSession) -> list[Item]:
     """Run the full ingestion pipeline: fetch from all sources, store, embed.
 
     Each source runs in its own savepoint — a single broken feed cannot

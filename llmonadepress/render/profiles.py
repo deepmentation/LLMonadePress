@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel
 
-from lemonade._paths import profiles_dir
+from llmonadepress._paths import profiles_dir
 
 
 class PageConfig(BaseModel):

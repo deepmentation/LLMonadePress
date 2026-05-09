@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from lemonade.cli import app
+from llmonadepress.cli import app
 
 runner = CliRunner()
 

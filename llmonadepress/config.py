@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from lemonade.llm.prompts.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES
+from llmonadepress.llm.prompts.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES
 
 
 class UserConfig(BaseModel):
@@ -62,8 +62,8 @@ class EmailDeliveryConfig(BaseModel):
     enabled: bool = False
     device_profile: str = "kindle_paperwhite"
     to: list[str] = Field(default_factory=list)
-    from_name: str = "Lemonade Daily"
-    subject_template: str = "Lemonade — {date:%A, %d. %B %Y}"
+    from_name: str = "LLMonadePress Daily"
+    subject_template: str = "LLMonadePress — {date:%A, %d. %B %Y}"
     attach_pdf: bool = True
     include_summary_in_body: bool = True
 
@@ -101,7 +101,7 @@ class SMTPSettings(BaseSettings):
     from_addr: str = Field(default="", validation_alias="LEMONADE_SMTP_FROM")
 
 
-class LemonadeConfig(BaseModel):
+class LLMonadePressConfig(BaseModel):
     user: UserConfig = Field(default_factory=UserConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     asr: ASRConfig = Field(default_factory=ASRConfig)
@@ -110,7 +110,7 @@ class LemonadeConfig(BaseModel):
     youtube: list[YouTubeSource] = Field(default_factory=list)
 
 
-def load_config(path: Path = Path("config.toml")) -> LemonadeConfig:
+def load_config(path: Path = Path("config.toml")) -> LLMonadePressConfig:
     path = Path(path)
     if path.is_dir():
         raise IsADirectoryError(
@@ -126,4 +126,4 @@ def load_config(path: Path = Path("config.toml")) -> LemonadeConfig:
         )
     with open(path, "rb") as f:
         data = tomllib.load(f)
-    return LemonadeConfig.model_validate(data)
+    return LLMonadePressConfig.model_validate(data)

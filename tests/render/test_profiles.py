@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from lemonade.render.profiles import load_profile, list_profiles, DeviceProfile
+from llmonadepress.render.profiles import load_profile, list_profiles, DeviceProfile
 
 PROFILES_DIR = Path(__file__).parent.parent.parent / "device_profiles"
 

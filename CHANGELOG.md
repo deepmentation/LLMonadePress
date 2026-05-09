@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-09
+
+### Renamed to **LLMonadePress** 🍋
+The project's display name and Python package are now **LLMonadePress** — a
+better one-word fit for what the tool actually does (LLMs press your feeds
+into a daily newspaper). The CLI command and operator-facing knobs stay as
+`lemonade` for muscle memory.
+
+### Changed
+- **Package / module:** `lemonade` → `llmonadepress`. Imports change
+  (`from llmonadepress.X import …`), package name on PyPI is
+  `llmonadepress`. Editable installs need a fresh `pip install -e .`.
+- **Display name everywhere user-visible:** `Lemonade` → `LLMonadePress`
+  in README, CLAUDE.md, GAP.md, AI-CODING-GUIDE.md, KONZEPT.md, the PDF
+  cover and colophon, the email subject and body defaults.
+- **Internal Pydantic config class:** `LemonadeConfig` →
+  `LLMonadePressConfig`.
+- **`pyproject.toml` `[tool.lemonade]` section** → `[tool.llmonadepress]`.
+
+### Stays as `lemonade` (deliberate, for ergonomics)
+- CLI command (`lemonade run`, `lemonade preview`, …)
+- Environment variable prefix (`LEMONADE_SMTP_*`, `LEMONADE_PROFILES_DIR`,
+  `LEMONADE_TEMPLATES_DIR`)
+- Postgres role, database name, and Docker volume — keeps existing
+  databases working without a migration.
+
+### Added
+- **Validation + retry loop in `write_story`.** Each generated article is
+  validated for a non-trivial headline (≥ 8 chars) and a non-trivial body
+  (≥ 80 chars). Failures trigger up to two retries with an explanatory
+  hint appended to the prompt. Stories that still come back empty after
+  three tries are dropped from the edition rather than shipped as blank
+  cards.
+
 ## [0.4.0] — 2026-05-09
 
 ### Cross-edition novelty + authoritative sources
@@ -206,7 +240,7 @@ The pipeline now produces real PDFs on real data with cloud or local LLMs.
 
 ### Fixed
 - App container no longer crash-loops when `config.toml` is missing.
-  Lemonade is a batch job, not a daemon — `docker compose up` now starts
+  LLMonadePress is a batch job, not a daemon — `docker compose up` now starts
   only the database, and pipeline runs are invoked explicitly via
   `docker compose run --rm app …`.
 - `load_config()` raises a helpful `IsADirectoryError` when Docker's bind
@@ -246,7 +280,7 @@ The pipeline now produces real PDFs on real data with cloud or local LLMs.
 ### Added
 - Multi-language prompt support with translation packs for English, German,
   and French (`lemonade/llm/prompts/i18n.py`).
-- `[tool.lemonade]` section in `pyproject.toml` declaring supported output
+- `[tool.llmonadepress]` section in `pyproject.toml` declaring supported output
   languages and the default language as the project-level source of truth.
 - Pydantic validator on `[user] language` rejects unsupported codes and
   normalises case.
@@ -301,7 +335,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...v0.3.1

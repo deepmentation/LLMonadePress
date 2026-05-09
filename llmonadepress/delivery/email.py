@@ -6,7 +6,7 @@ from pathlib import Path
 
 import aiosmtplib
 
-from lemonade.delivery.base import DeliveryChannel
+from llmonadepress.delivery.base import DeliveryChannel
 
 
 class EmailDelivery(DeliveryChannel):
@@ -21,7 +21,7 @@ class EmailDelivery(DeliveryChannel):
         from_addr: str,
         from_name: str,
         to: list[str],
-        subject_template: str = "Lemonade — {date:%A, %d. %B %Y}",
+        subject_template: str = "LLMonadePress — {date:%A, %d. %B %Y}",
         include_summary: bool = True,
     ):
         self.host = host
@@ -40,7 +40,7 @@ class EmailDelivery(DeliveryChannel):
         msg["From"] = f"{self.from_name} <{self.from_addr}>"
         msg["To"] = ", ".join(self.to)
         msg["Subject"] = self.subject_template.format(date=date)
-        msg.set_content(f"Deine Lemonade-Ausgabe vom {edition_date} liegt im Anhang.")
+        msg.set_content(f"Deine LLMonadePress-Ausgabe vom {edition_date} liegt im Anhang.")
 
         with open(pdf_path, "rb") as f:
             msg.add_attachment(

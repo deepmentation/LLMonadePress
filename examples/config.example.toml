@@ -1,5 +1,5 @@
 # ============================================================================
-# Lemonade — Beispiel-Konfiguration
+# LLMonadePress — Beispiel-Konfiguration
 # Kopiere diese Datei nach config.toml und passe sie an.
 # ============================================================================
 
@@ -9,7 +9,7 @@ timezone       = "Europe/Berlin"
 # Wann die Zeitung fertig sein soll (lokale Zeit)
 delivery_time  = "06:30"
 # Ausgabesprache der generierten Zeitung. Unterstuetzt: "en", "de", "fr".
-# Die Liste wird in pyproject.toml ([tool.lemonade]) gepflegt.
+# Die Liste wird in pyproject.toml ([tool.llmonadepress]) gepflegt.
 language       = "de"
 # Maximale Anzahl Stories pro Ausgabe
 max_stories    = 12
@@ -93,9 +93,9 @@ device_profile = "kindle_paperwhite"
 # Empfaenger-Adressen (mehrere moeglich)
 to             = ["meine-mail@example.com"]
 # Absendername in der E-Mail
-from_name      = "Lemonade Daily"
+from_name      = "LLMonadePress Daily"
 # Betreff-Template ({date} wird ersetzt)
-subject_template = "Lemonade — {date:%A, %d. %B %Y}"
+subject_template = "LLMonadePress — {date:%A, %d. %B %Y}"
 # SMTP-Einstellungen kommen aus Umgebungsvariablen:
 #   LEMONADE_SMTP_HOST, LEMONADE_SMTP_PORT,
 #   LEMONADE_SMTP_USER, LEMONADE_SMTP_PASS, LEMONADE_SMTP_FROM
