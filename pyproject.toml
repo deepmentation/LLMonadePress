@@ -35,9 +35,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lemonade-newspaper/lemonade"
-Repository = "https://github.com/lemonade-newspaper/lemonade"
-Issues = "https://github.com/lemonade-newspaper/lemonade/issues"
+Homepage = "https://github.com/deepmentation/LLMonadePress"
+Repository = "https://github.com/deepmentation/LLMonadePress"
+Issues = "https://github.com/deepmentation/LLMonadePress/issues"
 
 [project.scripts]
 lemonade = "llmonadepress.cli:app"

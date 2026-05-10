@@ -400,19 +400,19 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.6.1...HEAD
-[0.6.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.6.0...v0.6.1
-[0.6.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...v0.4.0
-[0.3.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...v0.3.2
-[0.3.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.6...v0.2.0
-[0.1.6]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.5...v0.1.6
-[0.1.5]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/lemonade-newspaper/lemonade/releases/tag/v0.1.0
+[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.3.2...v0.4.0
+[0.3.2]: https://github.com/deepmentation/LLMonadePress/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/deepmentation/LLMonadePress/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.6...v0.2.0
+[0.1.6]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/deepmentation/LLMonadePress/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/deepmentation/LLMonadePress/releases/tag/v0.1.0

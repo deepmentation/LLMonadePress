@@ -6,6 +6,8 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)]()
 
+🇩🇪 **[Deutsche Version](README_DE.md)**
+
 ---
 
 ## What is LLMonadePress?
@@ -41,8 +43,8 @@ Device profiles are YAML files — community contributions for new devices are w
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/lemonade-newspaper/lemonade.git
-cd lemonade
+git clone https://github.com/deepmentation/LLMonadePress.git
+cd LLMonadePress
 ```
 
 **2. Set up environment and config**
@@ -135,19 +137,16 @@ ruff check .
 ruff format .
 
 # Type checking
-mypy lemonade
+mypy llmonadepress
 ```
 
 ## Contributing
 
-Contributions are welcome! Whether it is a bug fix, a new device profile, or a feature idea — feel free to open an [issue](https://github.com/lemonade-newspaper/lemonade/issues) or submit a pull request.
+Contributions are welcome — bug fixes, new device profiles, delivery channels, translations, or feature ideas. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, code style, and good first issues.
 
-Good first contributions:
+## About
 
-- Add a new device profile (just a YAML file + a test)
-- Improve Typst templates
-- Add a new delivery channel
-- Add a translation
+[**deepmentation**](https://deepmentation.ai) are experts in applied AI, LLMs, and AI tooling. We use LLMonadePress ourselves to keep up with our many news sources every day. Use it for your own daily briefing — or help us evolve the idea further.
 
 ## License
 
