@@ -8,18 +8,53 @@ import litellm
 
 
 _FENCE_RE = re.compile(r"```(?:json)?\s*\n(.+?)\n```", re.DOTALL)
+_FENCE_OPEN_RE = re.compile(r"^\s*```(?:json)?\s*\n", re.IGNORECASE)
+_FENCE_CLOSE_RE = re.compile(r"\n```\s*$")
+
+
+def _strip_fence(content: str) -> str:
+    """Strip leading/trailing markdown code fences, even if asymmetric.
+
+    Sonnet sometimes emits ``` ```json\\n{...}\\n``` ``` cleanly; sometimes
+    only the opening fence; sometimes the closing fence is missing because
+    the response was truncated. Be lenient on both sides.
+    """
+    s = _FENCE_OPEN_RE.sub("", content)
+    s = _FENCE_CLOSE_RE.sub("", s)
+    return s.strip()
+
+
+def _try_repair(s: str) -> str | None:
+    """Optional last-ditch JSON repair via the json-repair library if installed.
+
+    Falls back to ``None`` if the dependency isn't there — keeps json-repair
+    optional so a fresh install isn't blocked on it.
+    """
+    try:
+        from json_repair import repair_json
+    except ImportError:
+        return None
+    try:
+        repaired = repair_json(s)
+        return repaired if repaired and repaired != "{}" else None
+    except Exception:
+        return None
 
 
 def _extract_json(content: str) -> dict | list | None:
     """Best-effort JSON extraction from LLM output.
 
-    Order of attempts:
-      1. Direct ``json.loads`` (well-behaved providers).
-      2. Inside a `````json ... ````` fence (Anthropic, many local models).
-      3. Span between the first ``{`` and the last ``}`` (prose-wrapped).
-      4. Span between the first ``[`` and the last ``]`` (top-level array).
+    Tries every reasonable interpretation, parses each, then returns the
+    **best-shaped** candidate — preferring a dict over a list, since callers
+    almost always want a top-level object. (Without this preference the
+    extractor sometimes matches an inner ``"sources": [...]`` array instead
+    of the wrapping article object, which then unwraps into a single
+    `{title, url, domain}` source dict — silent data corruption.)
     """
-    candidates: list[str] = [content]
+    candidates: list[str] = []
+
+    candidates.append(content)
+    candidates.append(_strip_fence(content))
 
     fence = _FENCE_RE.search(content)
     if fence:
@@ -31,12 +66,31 @@ def _extract_json(content: str) -> dict | list | None:
         if start != -1 and end > start:
             candidates.append(content[start : end + 1])
 
+    parsed: list[dict | list] = []
     for cand in candidates:
         try:
-            return json.loads(cand)
+            parsed.append(json.loads(cand))
         except json.JSONDecodeError:
             continue
-    return None
+
+    # Last resort: try the json-repair library on the de-fenced content.
+    if not parsed:
+        repaired = _try_repair(_strip_fence(content))
+        if repaired is not None:
+            try:
+                parsed.append(json.loads(repaired))
+            except json.JSONDecodeError:
+                pass
+
+    if not parsed:
+        return None
+
+    # Prefer dicts (any dict) over lists. Among dicts, prefer the first
+    # one — earlier candidates are closer to the original content shape.
+    for p in parsed:
+        if isinstance(p, dict):
+            return p
+    return parsed[0]
 
 
 @dataclass

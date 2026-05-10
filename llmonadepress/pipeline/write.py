@@ -71,10 +71,16 @@ async def write_story(
             model=model,
             system=build_write_system(language),
         )
-        # Some models (esp. Sonnet via OpenRouter) wrap a single object in a
-        # one-element list. Unwrap defensively before accessing fields.
+        # Some models wrap the article in a one-element list — unwrap, but
+        # only if the inner element looks like an article (has headline or
+        # body). Otherwise we'd happily unwrap a sources-array's first
+        # entry into a {title, url, domain} stub and ship a blank story.
         if isinstance(result, list):
-            result = result[0] if result else {}
+            head = result[0] if result else {}
+            if isinstance(head, dict) and any(k in head for k in ("headline", "body", "deck")):
+                result = head
+            else:
+                result = {}
         if not isinstance(result, dict):
             result = {}
 
@@ -84,6 +90,21 @@ async def write_story(
         logger.warning(
             "write_story attempt %d/%d for cluster %s failed validation: %s",
             attempt, _MAX_ATTEMPTS, cluster.id, ", ".join(last_problems),
+        )
+        # Diagnose what the LLM actually returned so we can tell whether
+        # the prompt is the problem, the JSON parsing, or the model itself.
+        raw = (response.content if response else "") or ""
+        logger.warning(
+            "  raw response (%d chars, %d→%d tokens):\n%s",
+            len(raw),
+            response.tokens_in if response else -1,
+            response.tokens_out if response else -1,
+            raw[:3000],
+        )
+        logger.warning(
+            "  parsed dict keys: %s; cluster.text length: %d",
+            list(result.keys()) if isinstance(result, dict) else f"<{type(result).__name__}>",
+            len(cluster.text or ""),
         )
 
     if last_problems:

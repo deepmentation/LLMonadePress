@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-05-10
+
+### Fixed
+- **Empty-story drops were silent data corruption, not LLM laziness.**
+  Pipeline observability (v0.6.0) revealed that ~60 % of writer
+  responses came back as "headline too short (0 chars)". Debug logging
+  showed the LLM returned **perfect JSON every time** — the bug was in
+  our extractor:
+  - Direct `json.loads` failed on the fenced response.
+  - The strict fence regex sometimes failed (truncation, asymmetric
+    fences, or stray characters).
+  - The fallback `{first..last}` span extraction failed when the body
+    contained an unescaped quote (Sonnet occasionally emits one).
+  - Then the `[first..last]` span extraction succeeded — by matching
+    the inner `"sources": [{title, url, domain}, …]` array.
+  - `write_story` unwrapped the list to its first element, getting a
+    `{title, url, domain}` source dict, which has no `headline` or
+    `body` — validated as empty, retried, failed again the same way.
+
+### Changed
+- `_extract_json` now collects **all** parseable interpretations and
+  prefers a `dict` candidate over a `list`. An inner sources array can
+  no longer masquerade as the outer article.
+- New `_strip_fence` helper handles asymmetric / unclosed code fences
+  (Sonnet sometimes opens a fence and never closes it).
+- `json-repair` is now an optional last-ditch parser for genuinely
+  malformed JSON (added as a runtime dep; gracefully skipped if absent).
+- `write_story` only unwraps a list result if the first element looks
+  like an article (has `headline` / `body` / `deck`). Otherwise it
+  treats the response as malformed and retries.
+
+### Added
+- Three regression tests (`test_extract_json_*`) that codify the
+  failure modes above so they don't come back.
+
 ## [0.6.0] — 2026-05-10
 
 ### Pipeline observability
@@ -365,7 +400,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/lemonade-newspaper/lemonade/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...v0.4.0
