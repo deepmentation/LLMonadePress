@@ -171,7 +171,7 @@ manuell gebundelt werden (`templates/fonts/`). Niedrige Priorität.
 | `lemonade sources list` | ✅ |
 | `lemonade sources test` | 🔴 |
 | `lemonade devices list` | ✅ |
-| `lemonade edition show <date>` | 🔴 |
+| `lemonade edition show <date>` | ✅ | seit v0.6.0 — Pipeline-Counts, Ranker-Scores, Items, gelieferte Stories |
 | `lemonade backfill <range>` | 🔴 |
 | `lemonade costs --month` | 🔴 |
 | `lemonade rmapi-auth` | 🔴 |

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-10
+
+### Pipeline observability
+After a real run with ~50 Whisper transcriptions producing only one
+article, "why?" was unanswerable from the logs. This release makes the
+pipeline narrate itself and lets you inspect any past edition.
+
+### Added
+- **Stage summaries logged at INFO level** during every `lemonade run`
+  / `preview`:
+  - eligible items after cross-edition dedup
+  - cluster count, largest cluster size, singleton count, top-5 sizes
+  - ranker entries returned, top scores
+  - stories written vs dropped during writing
+  Default level is INFO; tune with `LEMONADE_LOG_LEVEL=DEBUG` (or
+  WARNING). LiteLLM's chatty INFO logs are pinned to WARNING.
+- **`edition.metrics` now carries everything needed for retrospective
+  analysis:** the stage counts above, plus per-cluster ranker scores
+  (`relevance / novelty / depth / breadth / score / reason`) and the
+  source count for each ranked cluster.
+- **`lemonade edition show <YYYY-MM-DD> [--device X]`** — prints:
+  - status, PDF path, delivery time
+  - pipeline stage counts
+  - ranker scores per cluster (with reason)
+  - items grouped by cluster (with transcript source for YouTube)
+  - the actual stories shipped in the PDF
+
+  Answers questions like *"why only 1 article from 50 transcripts?"*
+  without diving into psql.
+
 ## [0.5.0] — 2026-05-09
 
 ### Renamed to **LLMonadePress** 🍋
@@ -335,7 +365,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/lemonade-newspaper/lemonade/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/lemonade-newspaper/lemonade/compare/v0.3.1...v0.3.2

@@ -239,6 +239,17 @@ async def run_pipeline(
             return []
         await _enrich_cluster_sources(session, clusters)
 
+        cluster_sizes = sorted([len(c.item_ids) for c in clusters], reverse=True)
+        singletons = sum(1 for s in cluster_sizes if s == 1)
+        logger.info(
+            "Pipeline: %d clusters from %d items "
+            "(largest=%d, singletons=%d, top sizes=%s)",
+            len(clusters), len(items),
+            cluster_sizes[0] if cluster_sizes else 0,
+            singletons,
+            cluster_sizes[:5],
+        )
+
         # 4. Rank
         llm = LLMClient(default_model=config.llm.ranker_model)
         ranked, _rank_resp = await rank_clusters(
@@ -247,6 +258,15 @@ async def run_pipeline(
             client=llm,
             model=config.llm.ranker_model,
             language=config.user.language,
+        )
+        logger.info(
+            "Pipeline: ranker returned %d/%d entries (max_stories=%d). "
+            "Top scores: %s",
+            len(ranked), len(clusters), config.user.max_stories,
+            [
+                f"{e.get('cluster_id', '?')}={e.get('score', '?')}"
+                for e in ranked[:5]
+            ],
         )
 
         # 5. Write
@@ -258,6 +278,41 @@ async def run_pipeline(
             model=config.llm.writer_model,
             language=config.user.language,
         )
+        dropped_in_write = len(ranked) - len(stories)
+        logger.info(
+            "Pipeline: %d stories written (%d dropped during write)",
+            len(stories), dropped_in_write,
+        )
+
+        # Metrics for this run, persisted on each edition below.
+        run_metrics = {
+            "items_eligible": len(items),
+            "clusters_total": len(clusters),
+            "clusters_singletons": singletons,
+            "cluster_sizes_top": cluster_sizes[:10],
+            "ranker_returned": len(ranked),
+            "ranker_max_stories": config.user.max_stories,
+            "stories_written": len(stories),
+            "stories_dropped_in_write": dropped_in_write,
+            # Per-cluster ranker scores so `lemonade edition show` can
+            # explain why a story made it.
+            "rank_entries": [
+                {
+                    "cluster_id": e.get("cluster_id"),
+                    "relevance": e.get("relevance"),
+                    "novelty": e.get("novelty"),
+                    "depth": e.get("depth"),
+                    "breadth": e.get("breadth"),
+                    "score": e.get("score"),
+                    "reason": e.get("reason"),
+                    "source_count": next(
+                        (len(c.sources) for c in clusters if c.id == e.get("cluster_id")),
+                        None,
+                    ),
+                }
+                for e in ranked
+            ],
+        }
 
         # 6. Render + deliver per device
         for device_id in devices:
@@ -280,6 +335,7 @@ async def run_pipeline(
                 device=device_id,
                 status="rendering",
                 json_payload=edition_json,
+                metrics=run_metrics,
             )
             session.add(edition)
             await session.flush()
