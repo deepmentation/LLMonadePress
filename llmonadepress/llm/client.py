@@ -24,11 +24,17 @@ def _strip_fence(content: str) -> str:
     return s.strip()
 
 
-def _try_repair(s: str) -> str | None:
-    """Optional last-ditch JSON repair via the json-repair library if installed.
+def _try_repair(s: str) -> dict | list | None:
+    """Run ``json-repair`` on the string and return the parsed result.
 
-    Falls back to ``None`` if the dependency isn't there — keeps json-repair
-    optional so a fresh install isn't blocked on it.
+    json-repair handles the LLM-typical breakage modes that strict
+    ``json.loads`` chokes on: unescaped quotes inside strings (Sonnet
+    occasionally emits an ASCII ``"`` instead of the smart-quote ``"`` it
+    seems to be aiming for), trailing commas, unterminated values caused
+    by truncation, and similar.
+
+    Returns the parsed value (dict or list) on success, ``None`` if the
+    library isn't installed or repair gives nothing useful.
     """
     try:
         from json_repair import repair_json
@@ -36,23 +42,32 @@ def _try_repair(s: str) -> str | None:
         return None
     try:
         repaired = repair_json(s)
-        return repaired if repaired and repaired != "{}" else None
     except Exception:
+        return None
+    if not repaired or repaired in ("{}", "[]", "null"):
+        return None
+    try:
+        return json.loads(repaired) if isinstance(repaired, str) else repaired
+    except json.JSONDecodeError:
         return None
 
 
 def _extract_json(content: str) -> dict | list | None:
     """Best-effort JSON extraction from LLM output.
 
-    Tries every reasonable interpretation, parses each, then returns the
-    **best-shaped** candidate — preferring a dict over a list, since callers
-    almost always want a top-level object. (Without this preference the
-    extractor sometimes matches an inner ``"sources": [...]`` array instead
-    of the wrapping article object, which then unwraps into a single
-    `{title, url, domain}` source dict — silent data corruption.)
+    Strategy:
+      1. Build candidate strings (raw, fence-stripped, fence-extracted,
+         {…} span, […] span).
+      2. Strict-parse each candidate.
+      3. If any **dict** parsed, return it (most callers want a top-level
+         object — preferring a dict over a list prevents an inner
+         ``"sources": [...]`` array from masquerading as the article).
+      4. Otherwise try ``json-repair`` on the dict-shaped candidates;
+         json-repair handles unescaped quotes / truncation / trailing
+         commas that strict ``json.loads`` rejects.
+      5. As a last resort, return whatever parsed (likely a list).
     """
     candidates: list[str] = []
-
     candidates.append(content)
     candidates.append(_strip_fence(content))
 
@@ -73,24 +88,25 @@ def _extract_json(content: str) -> dict | list | None:
         except json.JSONDecodeError:
             continue
 
-    # Last resort: try the json-repair library on the de-fenced content.
-    if not parsed:
-        repaired = _try_repair(_strip_fence(content))
-        if repaired is not None:
-            try:
-                parsed.append(json.loads(repaired))
-            except json.JSONDecodeError:
-                pass
-
-    if not parsed:
-        return None
-
-    # Prefer dicts (any dict) over lists. Among dicts, prefer the first
-    # one — earlier candidates are closer to the original content shape.
     for p in parsed:
-        if isinstance(p, dict):
+        if isinstance(p, dict) and p:
             return p
-    return parsed[0]
+
+    # No usable dict from strict parsing. Many real LLM responses look
+    # like a dict but have one mis-emitted character (commonly an
+    # unescaped ASCII quote inside a string body). Try to repair the
+    # candidates that *look* like a dict (start with ``{``).
+    for cand in candidates:
+        stripped = cand.strip()
+        if not stripped.startswith("{"):
+            continue
+        repaired = _try_repair(stripped)
+        if isinstance(repaired, dict) and repaired:
+            return repaired
+
+    if parsed:
+        return parsed[0]
+    return None
 
 
 @dataclass

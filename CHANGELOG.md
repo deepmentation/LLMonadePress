@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] — 2026-05-11
+
+### Fixed
+- **Empty stories were back — and now actually fixed.** v0.6.1 stopped
+  the silent corruption (a sources-array masquerading as the article)
+  but didn't recover the article. The underlying parse failure persisted
+  for any Sonnet response containing an unescaped ASCII ``"`` inside a
+  string body — apparently a frequent failure mode when Sonnet writes
+  German text with quote marks like `„10x Is Easier Than 2x"`.
+
+  `_extract_json` now invokes `json-repair` on every dict-shaped
+  candidate when no strict parse yielded a usable dict — not only as
+  a fallback when *no* candidate parsed. Repair recovers the full
+  article reliably (verified with the actual broken response).
+
+  `_try_repair` now returns the parsed value directly (was: a string)
+  and skips empty `{}` / `[]` / `null` results.
+- **Filesystem delivery no longer crashes with `SameFileError`.**
+  `orchestrate.run_pipeline` renders the PDF directly into
+  `config.delivery.filesystem.output_dir`, so when filesystem delivery
+  ran it tried to copy the file onto itself. `FilesystemDelivery.deliver`
+  now detects identical source/destination paths and treats it as a
+  no-op (the file is already where the user wants it).
+
+### Added
+- Two regression tests covering both failure modes — based on the
+  actual response captured in production logs.
+
 ## [0.6.1] — 2026-05-10
 
 ### Fixed
@@ -400,7 +428,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.4.0...v0.5.0

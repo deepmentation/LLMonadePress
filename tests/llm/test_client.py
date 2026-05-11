@@ -77,3 +77,31 @@ def test_extract_json_handles_clean_fenced_dict():
     content = '```json\n{"headline": "Hi", "body": "b"}\n```'
     result = _extract_json(content)
     assert result == {"headline": "Hi", "body": "b"}
+
+
+def test_extract_json_repairs_unescaped_quote_in_body():
+    """Regression for a real Sonnet failure mode: the body contains an
+    unescaped ASCII ``"`` (mis-typed smart quote) so strict JSON parse
+    fails on the outer object. Without json-repair the extractor falls
+    back to the inner ``sources: [...]`` array, and write_story ships an
+    empty story. With json-repair we recover the article."""
+    from llmonadepress.llm.client import _extract_json
+
+    content = (
+        '```json\n'
+        '{\n'
+        '  "headline": "Mit parallelen KI-Agenten zehnmal schneller",\n'
+        '  "deck": "test",\n'
+        '  "body": "Inspiriert vom Managementbuch „10x Is Easier Than 2x"'
+        ' argumentiert der Entwickler.",\n'
+        '  "category": "Technologie",\n'
+        '  "sources": [{"title": "X", "url": "u", "domain": "d"}],\n'
+        '  "pull_quote": "x"\n'
+        '}\n'
+        '```'
+    )
+    result = _extract_json(content)
+    assert isinstance(result, dict), f"expected dict, got {type(result).__name__}"
+    assert "headline" in result, f"missing headline; keys: {list(result.keys())}"
+    assert "body" in result
+    assert result["headline"].startswith("Mit parallelen")
