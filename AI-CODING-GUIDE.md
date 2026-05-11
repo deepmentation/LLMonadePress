@@ -48,26 +48,39 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Adding a new source adapter
 
-1. Create `lemonade/adapters/newadapter.py` implementing `SourceAdapter` ABC
+1. Create `llmonadepress/adapters/newadapter.py` implementing `SourceAdapter` ABC
 2. Add tests in `tests/adapters/test_newadapter.py`
-3. Register in adapter dispatch (pipeline/ingest.py)
-4. Add config section to Pydantic models
+3. Register in adapter dispatch (`llmonadepress/pipeline/ingest.py`)
+4. Add config section to Pydantic models in `llmonadepress/config.py`
 
 ### Adding a new device profile
 
 1. Create `device_profiles/new_device.yaml` following existing profile schema
 2. No code changes needed — Typst template reads profile dynamically
+3. Add a small test in `tests/render/test_profiles.py` that loads the new YAML
 
 ### Adding a new delivery channel
 
-1. Create `lemonade/delivery/newchannel.py` implementing `DeliveryChannel` ABC
-2. Add tests in `tests/delivery/test_newchannel.py`  
-3. Register in delivery orchestration
+1. Create `llmonadepress/delivery/newchannel.py` implementing `DeliveryChannel` ABC
+2. Add tests in `tests/delivery/test_newchannel.py`
+3. Register in delivery orchestration (`llmonadepress/pipeline/orchestrate.py`)
+4. Add a config block to `[delivery]` Pydantic models in `llmonadepress/config.py`
+
+### Adding a new output language
+
+1. Add a `PromptPack` entry to `llmonadepress/llm/prompts/i18n.py`
+2. Add the language code to `[tool.llmonadepress] supported_languages` in
+   `pyproject.toml`. The `test_pyproject_declares_supported_languages`
+   regression test enforces sync between the two.
 
 ## LLM Prompt Guidelines
 
-- Prompts live in `lemonade/llm/prompts/` as Python modules
+- Prompts live in `llmonadepress/llm/prompts/` as Python modules with
+  per-language packs in `i18n.py`
 - Always request structured JSON output
 - Include output schema in the prompt
 - Set hard word limits (e.g., body: 80-150 words)
+- Validate the parsed result against shape (see `llmonadepress/pipeline/write.py`)
 - Test prompt construction (not LLM output) in unit tests
+- LLM responses are noisy: rely on `_extract_json` (`llmonadepress/llm/client.py`)
+  which already handles fences, smart-quote breakage, list-wrapping, etc.

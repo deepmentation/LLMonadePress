@@ -101,12 +101,15 @@ Wichtige Sektionen:
 
 | Sektion | Zweck |
 |---|---|
-| `[user]` | Sprache, Ausgabezeit, Story-Anzahl |
-| `[llm]` | LiteLLM-Provider, Modelle, API-Key-Quelle |
-| `[asr]` | Whisper-Einstellungen für YouTube-Fallback |
-| `[delivery]` | reMarkable Cloud, Filesystem-Pfad, E-Mail/SMTP |
-| `[[rss]]` | RSS/Atom-Feed-Abonnements |
-| `[[youtube]]` | YouTube-Kanal-Abonnements |
+| `[user]` | Ausgabesprache, Zeitzone, Zustellzeit, max. Stories pro Ausgabe |
+| `[llm]` | LiteLLM-Provider-Strings für Ranker, Writer, Embedding-Modell |
+| `[asr]` | Tier-3-ASR-Backend für YouTube-Videos ohne Captions (`off` / `litellm` / `faster-whisper`) |
+| `[delivery]` | Welche Device-Profile gerendert werden, plus Filesystem / E-Mail / reMarkable Channels |
+| `[[rss]]` | RSS/Atom-Abonnements (URL + Kategorie, optional `follow_links` für Volltext) |
+| `[[youtube]]` | YouTube-Kanal-Abonnements (Channel-ID oder `@handle`, `min_duration_s` um Shorts zu überspringen) |
+
+Secrets (API-Keys, SMTP-Passwort) liegen in Umgebungsvariablen (`.env`),
+nie in `config.toml`.
 
 ## Architektur
 

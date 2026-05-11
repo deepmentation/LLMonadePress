@@ -16,7 +16,7 @@ git clone https://github.com/deepmentation/LLMonadePress.git
 cd LLMonadePress
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest                       # 76+ tests should pass
+pytest                       # 78+ tests should pass
 ```
 
 For an end-to-end run (needs Docker):

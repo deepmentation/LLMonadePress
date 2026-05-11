@@ -99,12 +99,15 @@ Key sections:
 
 | Section | Purpose |
 |---|---|
-| `[user]` | Name, device profile, language |
-| `[llm]` | LiteLLM provider, model, API key reference |
-| `[asr]` | Whisper settings for YouTube fallback |
-| `[delivery]` | reMarkable Cloud, filesystem path, email/SMTP |
-| `[[rss]]` | RSS/Atom feed subscriptions |
-| `[[youtube]]` | YouTube channel subscriptions |
+| `[user]` | Output language, timezone, delivery time, max stories per edition |
+| `[llm]` | LiteLLM provider strings for ranker, writer, embedding model |
+| `[asr]` | Tier-3 ASR backend for YouTube videos without captions (`off` / `litellm` / `faster-whisper`) |
+| `[delivery]` | Which device profiles to render, plus filesystem / email / reMarkable channel settings |
+| `[[rss]]` | RSS/Atom feed subscriptions (URL + category, optional `follow_links` for full text) |
+| `[[youtube]]` | YouTube channel subscriptions (channel ID or `@handle`, `min_duration_s` to skip Shorts) |
+
+Secrets (API keys, SMTP password) live in environment variables (`.env`),
+never in `config.toml`.
 
 ## Architecture
 

@@ -40,24 +40,28 @@ Each stage is independently re-runnable. Orchestrated by Cron (MVP).
 ## Commands
 
 ```bash
-# Development
-pip install -e ".[dev]"          # Install with dev dependencies
-pytest                           # Run tests
-pytest --cov=lemonade            # Run tests with coverage
-ruff check .                     # Lint
-ruff format .                    # Format
-mypy lemonade/                   # Type check
+# Development (runs against local Python, not Docker)
+pip install -e ".[dev]"             # Install with dev dependencies
+pytest                              # Run tests (78 currently)
+pytest --cov=llmonadepress          # Run tests with coverage
+ruff check .                        # Lint
+ruff format .                       # Format
+mypy llmonadepress                  # Type check
 
-# CLI
-lemonade run                     # Full pipeline: ingest → curate → render → deliver
-lemonade preview                 # Generate PDF, open preview, no delivery
-lemonade sources list            # List configured sources
-lemonade devices list            # List available device profiles
+# CLI (inside or outside Docker — entry point is `lemonade`)
+lemonade run                        # Full pipeline: ingest → curate → render → deliver
+lemonade preview                    # Generate PDF, no delivery
+lemonade init                       # Create DB schema + pgvector extension
+lemonade sources list               # List configured sources
+lemonade devices list               # List available device profiles
+lemonade edition show <YYYY-MM-DD>  # Inspect a past edition (counts, scores, items)
+lemonade email-test                 # Send a test email via configured SMTP
 
-# Docker
-docker compose up -d db          # Start Postgres
-docker compose run --rm app lemonade init    # Initialize DB schema
-docker compose up -d             # Start everything
+# Docker (the canonical operator path — config.toml + .env stay on host)
+docker compose up -d db             # Start Postgres only (app is a batch job)
+docker compose run --rm app init    # Initialize DB schema
+docker compose run --rm app preview # Render a PDF without delivering
+docker compose run --rm app run     # Full edition with delivery
 ```
 
 ## Key Design Decisions
@@ -86,14 +90,24 @@ See `examples/config.example.toml` for full reference.
 ## File Layout
 
 ```
-lemonade/
-├── cli.py              # Typer CLI entry point
-├── config.py           # TOML loader, Pydantic models
-├── db.py               # SQLAlchemy engine/session factory
-├── models.py           # SQLAlchemy ORM models
-├── adapters/           # Source adapters (RSS, YouTube)
-├── pipeline/           # Ingest, cluster, rank, write, orchestrate
-├── llm/                # LiteLLM wrapper + prompt templates
-├── render/             # Typst runner + device profile loader
-└── delivery/           # Delivery channels (filesystem, email, remarkable)
+llmonadepress/             # Python package (renamed from `lemonade/` in v0.5.0;
+                           # CLI command, ENV vars, Postgres role keep `lemonade`)
+├── cli.py                 # Typer CLI entry point (`lemonade …`)
+├── config.py              # TOML loader, Pydantic models (LLMonadePressConfig)
+├── db.py                  # SQLAlchemy async engine/session factory
+├── models.py              # SQLAlchemy ORM models
+├── _paths.py              # bundled-vs-repo data path resolver
+├── adapters/              # Source adapters (RSS, YouTube via yt-dlp)
+├── pipeline/              # ingest, cluster, rank, write, orchestrate
+├── llm/                   # LiteLLM wrapper + multilingual prompt templates
+├── render/                # Typst runner + device profile loader
+└── delivery/              # filesystem, email, remarkable
 ```
+
+## Naming convention (intentional, see GAP §12)
+
+| Surface | Name |
+|---|---|
+| Display name / brand | `LLMonadePress` |
+| Python package / module / PyPI | `llmonadepress` |
+| CLI command, ENV var prefix (`LEMONADE_*`), Postgres role | `lemonade` |
