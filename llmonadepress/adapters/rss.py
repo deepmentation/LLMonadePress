@@ -11,12 +11,25 @@ from llmonadepress.adapters.base import FetchedItem, SourceAdapter
 
 
 class RSSAdapter(SourceAdapter):
-    async def fetch(self, identifier: str, config: dict, since: datetime) -> list[FetchedItem]:
+    async def fetch(
+        self,
+        identifier: str,
+        config: dict,
+        since: datetime,
+        known_external_ids: set[str] | None = None,
+    ) -> list[FetchedItem]:
         feed = feedparser.parse(identifier)
+        known = known_external_ids or set()
         items = []
         for entry in feed.entries:
             published = self._parse_date(entry)
             if published and published < since:
+                continue
+
+            external_id = entry.get("id") or entry.get("link", "")
+            # Skip known items BEFORE optional fulltext fetch; that fetch
+            # is an HTTP round-trip per item, no reason to repeat it.
+            if external_id in known:
                 continue
 
             text = self._extract_text(entry)
@@ -24,7 +37,7 @@ class RSSAdapter(SourceAdapter):
                 text = await self._fetch_fulltext(entry.get("link", "")) or text
 
             items.append(FetchedItem(
-                external_id=entry.get("id") or entry.get("link", ""),
+                external_id=external_id,
                 url=entry.get("link", ""),
                 title=entry.get("title"),
                 author=entry.get("author"),

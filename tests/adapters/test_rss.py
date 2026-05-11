@@ -52,3 +52,19 @@ async def test_fetch_extracts_text(adapter, parsed_feed):
     with patch("llmonadepress.adapters.rss.feedparser.parse", return_value=parsed_feed):
         items = await adapter.fetch("https://example.com/feed.xml", {}, datetime(2024, 1, 1, tzinfo=timezone.utc))
         assert "article summary text" in items[0].raw_text
+
+
+@pytest.mark.asyncio
+async def test_fetch_skips_known_external_ids(adapter, parsed_feed):
+    """Regression: when follow_links is on, the adapter does an HTTP fetch
+    per item — pointless to repeat for items already in the DB."""
+    with patch("llmonadepress.adapters.rss.feedparser.parse", return_value=parsed_feed), \
+         patch.object(adapter, "_fetch_fulltext", AsyncMock(return_value="full")) as mock_fetch:
+        items = await adapter.fetch(
+            "https://example.com/feed.xml",
+            {"follow_links": True},
+            datetime(2024, 1, 1, tzinfo=timezone.utc),
+            known_external_ids={"article-1", "article-old"},
+        )
+    assert items == []
+    mock_fetch.assert_not_awaited()

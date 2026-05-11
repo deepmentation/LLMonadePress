@@ -35,17 +35,31 @@ class YouTubeAdapter(SourceAdapter):
         self.asr_config = asr_config
 
     async def fetch(
-        self, identifier: str, config: dict, since: datetime  # noqa: ARG002 — see DISCOVERY_LIMIT note
+        self,
+        identifier: str,
+        config: dict,
+        since: datetime,  # noqa: ARG002 — see DISCOVERY_LIMIT note
+        known_external_ids: set[str] | None = None,
     ) -> list[FetchedItem]:
         channel_url = self._channel_url(config.get("channel_id") or identifier)
         videos = await self._list_recent_videos(channel_url)
 
         min_duration = int(config.get("min_duration_s") or 0)
+        known = known_external_ids or set()
 
         items: list[FetchedItem] = []
+        skipped_known = 0
         for video in videos:
             video_id = video.get("id")
             if not video_id:
+                continue
+
+            # Skip already-stored videos BEFORE the expensive
+            # transcript / ASR step. Without this we'd re-transcribe
+            # every known video on every run — at ~$0.01 per Whisper
+            # call that adds up fast.
+            if video_id in known:
+                skipped_known += 1
                 continue
 
             duration = video.get("duration_s")
@@ -70,6 +84,11 @@ class YouTubeAdapter(SourceAdapter):
                     **({"duration_s": duration} if duration is not None else {}),
                 },
             ))
+        if skipped_known:
+            logger.info(
+                "YouTube %s: skipped %d already-known videos (no transcript fetched)",
+                identifier, skipped_known,
+            )
         return items
 
     @staticmethod

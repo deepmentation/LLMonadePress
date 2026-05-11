@@ -61,6 +61,24 @@ async def test_fetch_filters_shorts_by_min_duration(adapter):
 
 
 @pytest.mark.asyncio
+async def test_fetch_skips_known_videos_before_transcript(adapter):
+    """Regression: at ~$0.01 per Whisper call, re-transcribing already-stored
+    videos on every run was burning ~$0.65/run for zero new items. Adapter
+    must skip known external_ids BEFORE _get_transcript runs."""
+    videos = _videos(("v1", "first", 600), ("v2", "second", 600), ("v3", "third", 600))
+    with patch.object(adapter, "_list_recent_videos", AsyncMock(return_value=videos)), \
+         patch.object(adapter, "_get_transcript",
+                      AsyncMock(return_value={"text": "x", "source": "native_en"})) as mock_tx:
+        items = await adapter.fetch(
+            "UC123", {}, SINCE,
+            known_external_ids={"v1", "v3"},
+        )
+    # Only the unknown video should have been transcribed.
+    assert mock_tx.await_count == 1
+    assert [it.external_id for it in items] == ["v2"]
+
+
+@pytest.mark.asyncio
 async def test_fetch_passes_handle_to_discovery(adapter):
     with patch.object(adapter, "_list_recent_videos",
                       AsyncMock(return_value=[])) as mock_disc:

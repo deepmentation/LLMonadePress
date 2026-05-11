@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-05-11
+
+### Fixed
+- **Stop re-transcribing known YouTube videos every run.** A real
+  production run produced 49 OpenRouter Whisper calls (~$0.65, ~18 min
+  wall-clock) while the pipeline reported "0 new items" for every
+  channel — money and time burned for nothing.
+
+  Root cause: the YouTube adapter called `_get_transcript` (Tier 1/2
+  captions or Tier 3 ASR) for every discovered video, and the
+  `(source_id, external_id)` DB dedup happened only afterwards in
+  `_store_items`. Bekannte Videos got re-transcribed on every run.
+
+  Fix: pre-fetch the set of known external_ids per source in
+  `_ingest_one` (single SELECT) and pass it through the adapter's new
+  `known_external_ids` parameter. Adapters now skip discovery entries
+  matching known IDs **before** any per-item paid / slow work
+  (Whisper for YouTube, optional `follow_links` HTTP fetch for RSS).
+
+  Logged when it kicks in: `YouTube @handle: skipped N already-known
+  videos (no transcript fetched)`.
+
+### Changed
+- `SourceAdapter.fetch` now accepts an optional `known_external_ids:
+  set[str]` keyword. Custom adapters (community contributions) should
+  honour it for any expensive per-item work.
+
+### Added
+- Two regression tests (`test_fetch_skips_known_videos_before_transcript`
+  in YouTube, `test_fetch_skips_known_external_ids` in RSS) verifying
+  that the expensive paths are not invoked for known IDs.
+
 ## [0.6.2] — 2026-05-11
 
 ### Fixed
@@ -428,7 +460,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.5.0...v0.6.0

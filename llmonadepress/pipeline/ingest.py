@@ -77,6 +77,18 @@ async def _embed_items(
     await session.flush()
 
 
+async def _known_external_ids(session: AsyncSession, source: Source) -> set[str]:
+    """Return all external_ids already stored for ``source``.
+
+    Adapters use this to skip discovery entries for items we already have,
+    avoiding any per-item paid work (YouTube ASR, RSS fulltext fetch).
+    """
+    rows = await session.execute(
+        select(Item.external_id).where(Item.source_id == source.id)
+    )
+    return {row[0] for row in rows}
+
+
 async def _ingest_one(
     session: AsyncSession,
     source_type: str,
@@ -91,7 +103,8 @@ async def _ingest_one(
     try:
         async with session.begin_nested():
             source = await _ensure_source(session, source_type, identifier, config_dict)
-            fetched = await fetch_coro(source)
+            known = await _known_external_ids(session, source)
+            fetched = await fetch_coro(source, known)
             new_items = await _store_items(session, source, fetched)
             source.last_fetched = datetime.now(UTC)
             logger.info("%s %s: %d new items", label, identifier, len(new_items))
@@ -117,7 +130,9 @@ async def ingest(config: LLMonadePressConfig, session: AsyncSession) -> list[Ite
             "rss",
             src.url,
             src.model_dump(),
-            lambda _source, src=src: rss_adapter.fetch(src.url, src.model_dump(), since),
+            lambda _source, known, src=src: rss_adapter.fetch(
+                src.url, src.model_dump(), since, known_external_ids=known
+            ),
             "RSS",
         )
         all_new_items.extend(items)
@@ -130,8 +145,8 @@ async def ingest(config: LLMonadePressConfig, session: AsyncSession) -> list[Ite
             "youtube_channel",
             identifier,
             src.model_dump(),
-            lambda _source, src=src, identifier=identifier: yt_adapter.fetch(
-                identifier, src.model_dump(), since
+            lambda _source, known, src=src, identifier=identifier: yt_adapter.fetch(
+                identifier, src.model_dump(), since, known_external_ids=known
             ),
             "YouTube",
         )

@@ -18,5 +18,20 @@ class FetchedItem:
 
 class SourceAdapter(abc.ABC):
     @abc.abstractmethod
-    async def fetch(self, identifier: str, config: dict, since: datetime) -> list[FetchedItem]:
+    async def fetch(
+        self,
+        identifier: str,
+        config: dict,
+        since: datetime,
+        known_external_ids: set[str] | None = None,
+    ) -> list[FetchedItem]:
+        """Discover items for the given source.
+
+        ``known_external_ids`` lets the caller pre-filter videos / articles
+        already stored in the DB. Adapters with expensive per-item work
+        (YouTube ASR, RSS fulltext fetch) MUST honour it: skip discovery
+        entries whose external_id is in the set BEFORE doing any paid /
+        slow work. The orchestrator passes this set so duplicate runs
+        don't re-transcribe known videos.
+        """
         ...
