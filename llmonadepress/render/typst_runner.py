@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -9,6 +11,51 @@ from pathlib import Path
 
 from llmonadepress._paths import templates_dir
 from llmonadepress.render.profiles import DeviceProfile
+
+logger = logging.getLogger(__name__)
+
+
+def _iter_stories(edition_json: dict):
+    """Yield every story dict in the edition (lead + section stories)."""
+    lead = edition_json.get("lead_story")
+    if lead:
+        yield lead
+    for section in edition_json.get("sections", []) or []:
+        for story in section.get("stories", []) or []:
+            yield story
+
+
+def _generate_source_qrs(edition_json: dict, dest_dir: Path) -> None:
+    """Render a QR PNG for every unique source URL in the edition into
+    ``dest_dir`` and stamp the relative filename into each source dict.
+
+    Reused per URL — multiple stories pointing at the same source share a
+    file. Failures (e.g. qrcode unavailable, weird URL) are logged and
+    skipped silently; the template tolerates a missing ``qr_filename``.
+    """
+    try:
+        import qrcode
+    except ImportError:
+        logger.warning("qrcode library not installed; skipping QR generation")
+        return
+
+    seen: dict[str, str] = {}
+    for story in _iter_stories(edition_json):
+        for src in story.get("sources", []) or []:
+            url = (src.get("url") or "").strip()
+            if not url:
+                continue
+            if url not in seen:
+                key = hashlib.sha1(url.encode("utf-8")).hexdigest()[:12]
+                fname = f"qr_{key}.png"
+                try:
+                    img = qrcode.make(url, box_size=4, border=2)
+                    img.save(dest_dir / fname)
+                    seen[url] = fname
+                except Exception:
+                    logger.exception("QR generation failed for %s", url)
+                    continue
+            src["qr_filename"] = seen[url]
 
 
 def render_pdf(
@@ -41,6 +88,12 @@ def render_pdf(
             dst = tmp_dir / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, dst)
+
+        # Generate QR PNGs for every source URL into the same temp dir,
+        # so the template can reference them by relative filename.
+        # Mutates edition_json in place (adds source.qr_filename) — fine
+        # because we already own this rendering's copy of the dict.
+        _generate_source_qrs(edition_json, tmp_dir)
 
         edition_path = tmp_dir / "edition.json"
         profile_path = tmp_dir / "profile.json"

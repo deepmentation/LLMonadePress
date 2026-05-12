@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "llmonadepress"
-version = "0.6.3"
+version = "0.7.0"
 description = "LLMonadePress — AI-powered daily newspaper generator for E-Ink tablets and beyond"
 license = "MIT"
 requires-python = ">=3.12"
@@ -32,6 +32,9 @@ dependencies = [
     # Last-ditch JSON repair when LLMs emit slightly-malformed output
     # (unescaped quotes, trailing commas, truncated responses).
     "json-repair>=0.30",
+    # QR codes for source URLs in the rendered PDF, so you can scan
+    # a story straight to its source from a printed page or E-Ink screen.
+    "qrcode[pil]>=7.4",
 ]
 
 [project.urls]

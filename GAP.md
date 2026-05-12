@@ -1,7 +1,7 @@
 # GAP.md — Konzept vs. Implementierungsstand
 
 > Quasi-Roadmap. Vergleich der Spezifikation in [`KONZEPT.md`](KONZEPT.md) mit dem
-> aktuellen Code-Stand (**v0.6.2**, 78 Tests). Aktualisiert bei jedem
+> aktuellen Code-Stand (**v0.7.0**, 80 Tests). Aktualisiert bei jedem
 > nicht-trivialen Merge.
 
 **Legende:** ✅ implementiert · 🟡 teilweise / mit Einschränkungen · 🔴 fehlt
@@ -124,6 +124,8 @@ manuell gebundelt werden (`templates/fonts/`). Niedrige Priorität.
 | Section-Gruppierung nach Kategorie | ✅ | seit v0.2.0 |
 | Authoritative Source-Zeilen mit Channel + Datum + Title | ✅ | seit v0.4.0 |
 | Pull-Quotes im Layout | ✅ | seit v0.4.0 (`story.typ`) |
+| Page-Break pro Artikel (kein Bleed in nächste Story) | ✅ | seit v0.7.0 |
+| QR-Code pro Source-URL | ✅ | seit v0.7.0 — `qrcode[pil]`, 60/10/30 Layout |
 | `#outline` für reMarkable-Sidebar-Bookmarks | 🔴 | Profile haben `embed_bookmarks: true`, Template setzt es nicht um |
 | Image-Embedding (gedithered Thumbnails) | 🔴 | Konzept §11 v1.1 — bewusst aufgeschoben ⏭️ |
 | Hyperlink-Modi (`inline` / `short_url` / `footnote`) | 🔴 | Profile haben das Feld, Template ignoriert es |

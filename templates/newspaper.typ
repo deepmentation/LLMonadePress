@@ -1,4 +1,4 @@
-// JSON payloads are written to sibling files by lemonade.render.typst_runner.
+// JSON payloads are written to sibling files by llmonadepress.render.typst_runner.
 #let edition = json("edition.json")
 #let profile = json("profile.json")
 
@@ -25,6 +25,10 @@
 
 #cover-page(edition, profile)
 
+// Each story gets its own page so the source/QR block stays with the
+// article and the next headline always starts on a fresh page —
+// avoids the "orphan source bar at top of next page" problem on
+// small E-Ink screens.
 #let lead = edition.at("lead_story", default: none)
 #if lead != none {
   story-block(lead, profile)
@@ -33,9 +37,13 @@
 #for section in edition.at("sections", default: ()) {
   let stories = section.at("stories", default: ())
   if stories.len() > 0 {
+    pagebreak(weak: true)
     heading(level: 1)[#section.at("name", default: "")]
+    let first = true
     for story in stories {
+      if not first { pagebreak(weak: true) }
       story-block(story, profile)
+      first = false
     }
   }
 }
