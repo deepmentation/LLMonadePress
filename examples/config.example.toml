@@ -62,6 +62,13 @@ model_size     = "medium"
 # Sprache: "auto" fuer automatische Erkennung, oder ISO-Code z.B. "de", "en"
 language       = "auto"
 
+# ─── Rendering-Optionen ───────────────────────────────────────────────────
+[render]
+# QR-Code pro Quell-URL neben der Citation rendern. Auf "false" setzen,
+# wenn du nur die Text-Citation willst (z.B. fuer Druck oder schmale
+# Geraete, wo der QR zu klein zum Scannen waere).
+qr_codes       = true
+
 # ─── Zustellung ────────────────────────────────────────────────────────────
 [delivery]
 # Fuer welche Geraete PDFs gerendert werden sollen

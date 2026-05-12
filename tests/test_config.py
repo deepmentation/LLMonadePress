@@ -139,6 +139,16 @@ class TestYouTubeSources:
         assert src.min_duration_s == 60
 
 
+class TestRenderConfig:
+    def test_default_qr_enabled(self, tmp_path: Path) -> None:
+        cfg = load_config(_write_toml(tmp_path, b""))
+        assert cfg.render.qr_codes is True
+
+    def test_qr_codes_can_be_disabled(self, tmp_path: Path) -> None:
+        cfg = load_config(_write_toml(tmp_path, b"[render]\nqr_codes = false\n"))
+        assert cfg.render.qr_codes is False
+
+
 class TestSMTPSettings:
     def test_defaults(self) -> None:
         s = SMTPSettings()

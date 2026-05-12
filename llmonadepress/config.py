@@ -46,6 +46,13 @@ class ASRConfig(BaseModel):
     language: str = "auto"
 
 
+class RenderConfig(BaseModel):
+    # Visual / layout knobs that apply across all device profiles. Per-device
+    # typography/page-size lives in device_profiles/*.yaml; user preferences
+    # that don't depend on the device live here.
+    qr_codes: bool = True  # Render a QR per source URL (set False to hide them)
+
+
 class RemarkableDeliveryConfig(BaseModel):
     enabled: bool = False
     device_profile: str = "remarkable_ppm"
@@ -105,6 +112,7 @@ class LLMonadePressConfig(BaseModel):
     user: UserConfig = Field(default_factory=UserConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     asr: ASRConfig = Field(default_factory=ASRConfig)
+    render: RenderConfig = Field(default_factory=RenderConfig)
     delivery: DeliveryConfig = Field(default_factory=DeliveryConfig)
     rss: list[RSSSource] = Field(default_factory=list)
     youtube: list[YouTubeSource] = Field(default_factory=list)

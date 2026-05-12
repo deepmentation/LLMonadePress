@@ -30,9 +30,15 @@ def _generate_source_qrs(edition_json: dict, dest_dir: Path) -> None:
     ``dest_dir`` and stamp the relative filename into each source dict.
 
     Reused per URL — multiple stories pointing at the same source share a
-    file. Failures (e.g. qrcode unavailable, weird URL) are logged and
-    skipped silently; the template tolerates a missing ``qr_filename``.
+    file. Skipped entirely when ``edition.render.qr_codes`` is False so the
+    user's opt-out is honoured. Failures (e.g. qrcode unavailable, weird URL)
+    are logged and skipped silently; the template tolerates a missing
+    ``qr_filename``.
     """
+    render_cfg = edition_json.get("render") or {}
+    if not render_cfg.get("qr_codes", True):
+        return
+
     try:
         import qrcode
     except ImportError:

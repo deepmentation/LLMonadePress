@@ -1,7 +1,7 @@
 # GAP.md — Konzept vs. Implementierungsstand
 
 > Quasi-Roadmap. Vergleich der Spezifikation in [`KONZEPT.md`](KONZEPT.md) mit dem
-> aktuellen Code-Stand (**v0.7.0**, 80 Tests). Aktualisiert bei jedem
+> aktuellen Code-Stand (**v0.7.1**, 84 Tests). Aktualisiert bei jedem
 > nicht-trivialen Merge.
 
 **Legende:** ✅ implementiert · 🟡 teilweise / mit Einschränkungen · 🔴 fehlt
@@ -61,6 +61,7 @@ komplett · ⏭️ bewusst aufgeschoben (siehe KONZEPT §11 Roadmap).
 | `[user]` | ✅ | Sprachen-Validierung gegen i18n-Registry (v0.1.1) |
 | `[llm]` | ✅ | Provider-neutral; Default-Sprache `en` |
 | `[asr]` | ✅ | Backends: `off` (default), `litellm` (mit OpenRouter-Direct-REST), `faster-whisper` |
+| `[render]` (qr_codes) | ✅ | seit v0.7.1 — Layout-Optionen die nicht device-spezifisch sind |
 | `[delivery]` + Subsektionen | ✅ | filesystem aktiv, email + remarkable opt-in |
 | `[[rss]]` | ✅ | inkl. `follow_links` für Volltext-Nachladen |
 | `[[youtube]]` | ✅ | Channel-ID oder `@handle`, `min_duration_s` honoriert |
@@ -125,7 +126,7 @@ manuell gebundelt werden (`templates/fonts/`). Niedrige Priorität.
 | Authoritative Source-Zeilen mit Channel + Datum + Title | ✅ | seit v0.4.0 |
 | Pull-Quotes im Layout | ✅ | seit v0.4.0 (`story.typ`) |
 | Page-Break pro Artikel (kein Bleed in nächste Story) | ✅ | seit v0.7.0 |
-| QR-Code pro Source-URL | ✅ | seit v0.7.0 — `qrcode[pil]`, 60/10/30 Layout |
+| QR-Code pro Source-URL | ✅ | seit v0.7.0 — `qrcode[pil]`, 60/10/30 Layout. Opt-out via `[render] qr_codes = false` (v0.7.1) |
 | `#outline` für reMarkable-Sidebar-Bookmarks | 🔴 | Profile haben `embed_bookmarks: true`, Template setzt es nicht um |
 | Image-Embedding (gedithered Thumbnails) | 🔴 | Konzept §11 v1.1 — bewusst aufgeschoben ⏭️ |
 | Hyperlink-Modi (`inline` / `short_url` / `footnote`) | 🔴 | Profile haben das Feld, Template ignoriert es |

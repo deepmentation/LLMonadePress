@@ -25,13 +25,15 @@
 
 #cover-page(edition, profile)
 
+#let qr-enabled = edition.at("render", default: (:)).at("qr_codes", default: true)
+
 // Each story gets its own page so the source/QR block stays with the
 // article and the next headline always starts on a fresh page —
 // avoids the "orphan source bar at top of next page" problem on
 // small E-Ink screens.
 #let lead = edition.at("lead_story", default: none)
 #if lead != none {
-  story-block(lead, profile)
+  story-block(lead, profile, qr-enabled: qr-enabled)
 }
 
 #for section in edition.at("sections", default: ()) {
@@ -42,7 +44,7 @@
     let first = true
     for story in stories {
       if not first { pagebreak(weak: true) }
-      story-block(story, profile)
+      story-block(story, profile, qr-enabled: qr-enabled)
       first = false
     }
   }

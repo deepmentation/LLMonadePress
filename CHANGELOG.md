@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-05-12
+
+### Added
+- **`[render] qr_codes` opt-out in `config.toml`.** New top-level
+  `RenderConfig` Pydantic model and `[render]` TOML section. Set
+  `qr_codes = false` to drop the QR images and let each source row
+  reflow to full width — useful for printed editions, very small
+  screens, or anyone who finds QR codes visually loud.
+- The setting flows through `edition.render.qr_codes` to the Typst
+  template; `_generate_source_qrs` short-circuits when disabled so
+  no PNGs are ever written. Two regression tests cover both paths.
+
+### Changed
+- `templates/components/story.typ`: `_source-row` now takes a
+  `qr-enabled` flag. With QRs on, the existing 60/10/30 grid renders.
+  With QRs off, the citation gets the full text width with a clickable
+  URL fallback.
+
 ## [0.7.0] — 2026-05-12
 
 ### One article per page block + scannable QR sources
@@ -492,7 +510,8 @@ sources, optimized for E-Ink tablets.
 - Full pipeline orchestration (ingest → cluster → rank → write → render → deliver)
 - 44 passing unit tests
 
-[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/deepmentation/LLMonadePress/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/deepmentation/LLMonadePress/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.3...v0.7.0
 [0.6.3]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/deepmentation/LLMonadePress/compare/v0.6.1...v0.6.2

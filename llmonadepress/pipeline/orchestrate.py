@@ -86,11 +86,13 @@ def _build_edition_json(
     language: str,
     rss_count: int = 0,
     youtube_count: int = 0,
+    qr_codes: bool = True,
 ) -> dict:
     """Assemble the edition payload consumed by templates/newspaper.typ.
 
     Schema (must stay in sync with templates):
       edition_date, device, language: scalars
+      render: {qr_codes}
       lead_story: top-ranked story (or None)
       sections: list of {name, stories[]} grouped by category
       metadata: {sources_count: {rss, youtube}}
@@ -111,6 +113,7 @@ def _build_edition_json(
         "edition_date": edition_date.isoformat(),
         "device": device,
         "language": language,
+        "render": {"qr_codes": qr_codes},
         "sections": sections,
         "metadata": {
             "sources_count": {"rss": rss_count, "youtube": youtube_count},
@@ -324,6 +327,7 @@ async def run_pipeline(
                 language=config.user.language,
                 rss_count=len(config.rss),
                 youtube_count=len(config.youtube),
+                qr_codes=config.render.qr_codes,
             )
 
             output_dir = Path(config.delivery.filesystem.output_dir)
